@@ -1,4 +1,5 @@
 from django.contrib import auth
+from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -16,7 +17,12 @@ def query(request):
         res = {'msg': 'success'}
         return HttpResponse(json.dumps(res))
 
-
+def home(request):
+    user = get_user(request)
+    if user.is_anonymous:
+        return render(request,'landing.html')
+    else:
+        return redirect('manage')
 
 # Create your views here.
 def login(request):
@@ -67,3 +73,6 @@ def register(request):
 def logout(request):
     auth.logout(request)
     return redirect('login')
+
+def manage(request):
+    return render(request,'manage.html')
