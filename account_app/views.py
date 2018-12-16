@@ -6,23 +6,28 @@ from django.shortcuts import render, redirect
 from account_app import models
 import time
 import json
+
+
 # Create your views here.
 def add(request):
     # if request.method == "POST":
     res = {'msg': 'success'}
     return HttpResponse(json.dumps(res))
 
+
 def query(request):
     if request.method == "GET":
         res = {'msg': 'success'}
         return HttpResponse(json.dumps(res))
 
+
 def home(request):
     user = get_user(request)
     if user.is_anonymous:
-        return render(request,'landing.html')
+        return render(request, 'landing.html')
     else:
         return redirect('manage')
+
 
 # Create your views here.
 def login(request):
@@ -32,14 +37,14 @@ def login(request):
         try:
             re = models.MyUser.objects.get(email=email)
         except models.MyUser.DoesNotExist:
-            res = {'msg': 'fail','info':'email not found.'}
+            res = {'msg': 'fail', 'info': 'email not found.'}
             return HttpResponse(json.dumps(res))
         re = auth.authenticate(request, username=email, password=password)
         if re is None:
             res = {'msg': 'fail', 'info': 'password is invalid.'}
             return HttpResponse(json.dumps(res))
-        auth.login(request,re)
-        res = {'msg':'success'}
+        auth.login(request, re)
+        res = {'msg': 'success'}
         return HttpResponse(json.dumps(res))
     return render(request, 'login.html');
 
@@ -51,7 +56,7 @@ def register(request):
         username = request.POST.get('username')
         try:
             re = models.MyUser.objects.get(email=email)
-            res = {'msg': 'fail','info':'email already taken.'}
+            res = {'msg': 'fail', 'info': 'email already taken.'}
             return HttpResponse(json.dumps(res))
         except models.MyUser.DoesNotExist:
             try:
@@ -69,10 +74,64 @@ def register(request):
                 return HttpResponse(json.dumps(res))
     return render(request, 'register.html')
 
+
 @login_required
 def logout(request):
     auth.logout(request)
     return redirect('login')
 
+
 def manage(request):
-    return render(request,'manage.html')
+    return render(request, 'manage.html')
+
+
+def mycontract(request):
+    if request.method == "POST":
+        dic = {'0':'待分配','1':'会签中','2':'定稿中','3':'审批中','4':'签订中','5':'签订完成'}
+        user = get_user(request)
+        user_models = models.MyUser.objects.get(email=user.email)
+        results = models.Contract.objects.filter(draft=user_models)
+        contracts = []
+        contract = {}
+        for result in results:
+            contract["contractnum"] = result.contractnum
+            contract["contractname"] = result.contractname
+            contract['clientname'] = result.clientnum.clientname
+            contract['begintime'] = result.begintime.__str__()
+            contract['endtime'] = result.endtime.__str__()
+            contract['stateNum'] = dic.get(result.state.__str__())
+            contract['draft'] = result.draft.username
+            contracts.append(contract)
+        json_ = {'contracts': contracts}
+        print(json_)
+        return HttpResponse(json.dumps(json_))
+
+    else:
+        clients = models.Client.objects.all()
+        res=[]
+        for client in clients:
+            res.append(client.clientname)
+        json_={'clients':res}
+        return render(request,"mycontract.html",json_)
+
+def setcontract(request):
+    return render(request, 'setcontract.html')
+
+def newcontract(request):
+    if request.method == "POST":
+        contractname = request.POST.get("contractname")
+        # clientname = request.POST.get("clientname")
+        clientname = models.Client.objects.get(clientname='蝙蝠侠')
+        begintime = request.POST.get("begintime")
+        endtime = request.POST.get("endtime")
+
+        content = request.POST.get("content")
+        file = request.POST.get("file", "")
+
+        user = get_user(request)
+        user_models = models.MyUser.objects.get(email=user.email)
+        contract = models.Contract(contractname=contractname, clientnum=clientname, begintime=begintime,
+                                   endtime=endtime, content=content, file=file, draft=user_models)
+        contract.save()
+        msg = {'msg': 'success'}
+        return HttpResponse(json.dumps(msg))

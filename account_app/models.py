@@ -85,19 +85,18 @@ class Contract(models.Model):
     content = models.CharField(max_length=200)
     draft = models.ForeignKey('MyUser',on_delete=models.SET_NULL,null=True)
     state = models.IntegerField(default=0,choices=((0,'待分配'),(1,'会签中'),(2,'定稿中'),(3,'审批中'),(4,'签订中'),(5,'签订完成')))
-    file = models.FileField()
-    uploadtime = models.DateField()
+    file = models.FileField(blank=True,null=True,default=None)
 
 class Client(models.Model):
-    clientnum = models.CharField(max_length=20,primary_key=True)
+    clientnum = models.AutoField(primary_key=True)
     clientname = models.CharField(max_length=40)
-    address = models.CharField(max_length=100)
-    tel = models.CharField(max_length=20)
-    fax = models.CharField(max_length=20)
-    code = models.CharField(max_length=10)
-    bank = models.CharField(max_length=50)
-    account = models.CharField(max_length=50)
-    addition = models.CharField(max_length=100)
+    address = models.CharField(max_length=100,default='')
+    tel = models.CharField(max_length=20,default='')
+    fax = models.CharField(max_length=20,default='')
+    code = models.CharField(max_length=10,default='')
+    bank = models.CharField(max_length=50,default='')
+    account = models.CharField(max_length=50,default='')
+    addition = models.CharField(max_length=100,default='')
     username = models.ForeignKey('MyUser',on_delete=models.CASCADE)
 
 class Administration(models.Model):
