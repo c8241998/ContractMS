@@ -134,7 +134,8 @@
                                 clientname: contract.clientname, //客户名
                                 begintime:contract.begintime, //开始时间
                                 endtime: contract.endtime, //结束时间
-                                state: contract.stateNum, //状态编号
+                                stateNum: contract.stateNum, //状态编号
+                                state: contract.state, //状态
                                 draft: contract.draft//起草人
                             }
                         );
@@ -196,6 +197,7 @@
                                         type: 'success'
                                     });
                                     vue.showNewcontract = false;
+                                    window.location.href="\mycontract";
                                 }
                                 else if (msg["msg"] == "fail") {
                                     vue.$message.error('起草失败！');

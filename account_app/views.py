@@ -92,14 +92,16 @@ def mycontract(request):
         user_models = models.MyUser.objects.get(email=user.email)
         results = models.Contract.objects.filter(draft=user_models)
         contracts = []
-        contract = {}
+
         for result in results:
+            contract = {}
             contract["contractnum"] = result.contractnum
             contract["contractname"] = result.contractname
             contract['clientname'] = result.clientnum.clientname
             contract['begintime'] = result.begintime.__str__()
             contract['endtime'] = result.endtime.__str__()
-            contract['stateNum'] = dic.get(result.state.__str__())
+            contract['state'] = dic.get(result.state.__str__())
+            contract['stateNum'] = result.state
             contract['draft'] = result.draft.username
             contracts.append(contract)
         json_ = {'contracts': contracts}
@@ -120,7 +122,7 @@ def newcontract(request):
     if request.method == "POST":
         contractname = request.POST.get("contractname")
         # clientname = request.POST.get("clientname")
-        clientname = models.Client.objects.get(clientname='蝙蝠侠')
+        clientname = models.Client.objects.get(clientname=request.POST.get("clientname"))
         begintime = request.POST.get("begintime")
         endtime = request.POST.get("endtime")
 
