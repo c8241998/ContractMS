@@ -103,7 +103,6 @@ def mycontract(request):
             contract['draft'] = result.draft.username
             contracts.append(contract)
         json_ = {'contracts': contracts}
-        print(json_)
         return HttpResponse(json.dumps(json_))
 
     else:
