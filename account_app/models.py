@@ -84,7 +84,7 @@ class Contract(models.Model):
     content = models.CharField(max_length=200)
     draft = models.ForeignKey('MyUser',on_delete=models.SET_NULL,null=True)
     state = models.IntegerField(default=0,choices=((0,'待分配'),(1,'会签中'),(2,'定稿中'),(3,'审批中'),(4,'签订中'),(5,'签订完成')))
-    file = models.FileField(blank=True,null=True,default=None)
+    file = models.FileField(upload_to='uploads/',blank=True,null=True,default=None)
 
 class Client(models.Model):
     clientnum = models.AutoField(primary_key=True)

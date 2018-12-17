@@ -1,12 +1,12 @@
 from django.contrib import auth
 from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, redirect
 from account_app import models
 import time
 import json
-
+from django.http import FileResponse
 
 # Create your views here.
 def add(request):
@@ -85,7 +85,7 @@ def manage(request):
     return render(request, 'manage.html')
 
 
-def mycontract(request):
+def myContract(request):
     if request.method == "POST":
         dic = {'0':'待分配','1':'会签中','2':'定稿中','3':'审批中','4':'签订中','5':'签订完成'}
         user = get_user(request)
@@ -103,6 +103,8 @@ def mycontract(request):
             contract['state'] = dic.get(result.state.__str__())
             contract['stateNum'] = result.state
             contract['draft'] = result.draft.username
+            contract['content'] = result.content
+            contract['file'] =  'true' if result.file else 'false'
             contracts.append(contract)
         json_ = {'contracts': contracts}
         return HttpResponse(json.dumps(json_))
@@ -115,10 +117,10 @@ def mycontract(request):
         json_={'clients':res}
         return render(request,"mycontract.html",json_)
 
-def setcontract(request):
+def setContract(request):
     return render(request, 'setcontract.html')
 
-def newcontract(request):
+def newContract(request):
     if request.method == "POST":
         contractname = request.POST.get("contractname")
         # clientname = request.POST.get("clientname")
@@ -127,8 +129,7 @@ def newcontract(request):
         endtime = request.POST.get("endtime")
 
         content = request.POST.get("content")
-        file = request.POST.get("file", "")
-
+        file = request.FILES.get("file", "")
         user = get_user(request)
         user_models = models.MyUser.objects.get(email=user.email)
         contract = models.Contract(contractname=contractname, clientnum=clientname, begintime=begintime,
@@ -136,3 +137,38 @@ def newcontract(request):
         contract.save()
         msg = {'msg': 'success'}
         return HttpResponse(json.dumps(msg))
+
+def myManageContract(request):
+    return render(request, 'myManageContract.html')
+
+def setContract(request):
+    return render(request, 'setContract.html')
+
+def allContract(request):
+    return render(request, 'allContract.html')
+
+def role(request):
+    return render(request, 'role.html')
+
+def user(request):
+    return render(request, 'user.html')
+
+def myClient(request):
+    return render(request, 'myClient.html')
+
+def allClient(request):
+    return render(request, 'allClient.html')
+
+def log(request):
+    return render(request, 'log.html')
+
+def downloadFile(request):
+    if request.method == "POST":
+        contractnum = request.POST.get('contractnum')
+        file = models.Contract.objects.get(contractnum=contractnum).file
+        file_=open('media/' + file.name, 'rb')
+        response = FileResponse(file_)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="'+file.name+'"'
+
+        return response

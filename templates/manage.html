@@ -7,6 +7,7 @@
     <title>Manage</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="//cdnjs.loli.net/ajax/libs/mdui/0.4.2/css/mdui.min.css">
     <link rel="stylesheet" href="{% static 'style/my.css' %}">
 </head>
 
@@ -44,43 +45,45 @@
             <el-radio-button :label="false">展开</el-radio-button>
             <el-radio-button :label="true">收起</el-radio-button>
         </el-radio-group>
-        <el-container style="height: 600px; border: 1px solid #eee">
+        <el-container v-bind:style="{border: '1px solid #eee', height:myheight}">
             <el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose"
                 :collapse="isCollapse">
                 <el-submenu index="1">
                     <template slot="title">
-                        <i class="el-icon-location"></i>
+                        <i class="mdui-icon material-icons">&#xe85d;</i>
                         <span slot="title">合同管理</span>
                     </template>
-                    <el-menu-item-group title="·角色1">
-                        <el-menu-item index="1-1" data-target="#assignment" @click="setiframeScr('setcontract')">分配合同管理人员</el-menu-item>
-                    </el-menu-item-group>
-                    <el-menu-item-group title="·角色2">
-                        <el-menu-item index="1-2" data-target="#assignment1" @click="setiframeScr('mycontract')" >我的合同</el-menu-item>
-                    </el-menu-item-group>
-
+                    <el-menu-item index="1-1" data-target="#assignment1" @click="setiframeScr('myContract')" >· 我起草的合同</el-menu-item>
+                    <el-menu-item index="1-2" data-target="#assignment1" @click="setiframeScr('myManageContract')" >· 我管理的合同</el-menu-item>
+                    <el-menu-item index="1-3" data-target="#assignment" @click="setiframeScr('setContract')">· 分配合同</el-menu-item>
+                    <el-menu-item index="1-4" data-target="#assignment1" @click="setiframeScr('allContract')" >· 全部合同</el-menu-item>
                 </el-submenu>
-                <el-menu-item index="2">
-                    <i class="el-icon-menu"></i>
-                    <span slot="title">用户管理</span>
-                </el-menu-item>
-                <el-menu-item index="3" disabled>
-                    <i class="el-icon-document"></i>
+                <el-menu-item index="2" @click="setiframeScr('role')">
+                    <i class="mdui-icon material-icons">&#xe85e;</i>
                     <span slot="title">角色管理</span>
                 </el-menu-item>
-                <el-menu-item index="4">
-                    <i class="el-icon-setting"></i>
-                    <span slot="title">客户管理</span>
+                <el-menu-item index="3" @click="setiframeScr('user')">
+                    <i class="mdui-icon material-icons">&#xe853;</i>
+                    <span slot="title">用户管理</span>
                 </el-menu-item>
-                <el-menu-item-group title="·boss">
-                    <el-menu-item index="1-2">日志</el-menu-item>
-                </el-menu-item-group>
+                <el-submenu index="4">
+                    <template slot="title">
+                        <i class="mdui-icon material-icons">&#xe87c;</i>
+                        <span slot="title">客户管理</span>
+                    </template>
+                    <el-menu-item index="4-1" data-target="#assignment" @click="setiframeScr('myClient')">· 我的客户</el-menu-item>
+                    <el-menu-item index="4-2" data-target="#assignment1" @click="setiframeScr('allClient')" >· 全部客户</el-menu-item>
+                </el-submenu>
+                <el-menu-item index="5" @click="setiframeScr('log')">
+                    <i class="mdui-icon material-icons">&#xe86d;</i>
+                    <span slot="title">日志</span>
+                </el-menu-item>
             </el-menu>
 
 
             <el-container>
                     <iframe v-if="iframeScr!=''" :src="iframeScr" height="100%" width="100%"></iframe>
-                    <iframe v-else :src="'mycontract'" height="100%" width="100%"></iframe>
+                    <iframe v-else :src="'myContract'" height="100%" width="100%"></iframe>
             </el-container>
         </el-container>
     </div>
@@ -98,8 +101,12 @@
         data() {
             return {
                 isCollapse: true,
-                iframeScr:'',
+                iframeScr: '',
+                myheight: '',
             };
+        },
+        created() {
+            this.setmyheight()
         },
         methods: {
             handleOpen(key, keyPath) {
@@ -108,8 +115,11 @@
             handleClose(key, keyPath) {
                 console.log(key, keyPath);
             },
-            setiframeScr(scr){
-                this.iframeScr=scr;
+            setiframeScr(scr) {
+                this.iframeScr = scr;
+            },
+            setmyheight(){
+                this.myheight=window.innerHeight-113+'px';
             }
         }
     })
