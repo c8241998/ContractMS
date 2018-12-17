@@ -80,7 +80,7 @@ def logout(request):
     auth.logout(request)
     return redirect('login')
 
-
+@login_required
 def manage(request):
     return render(request, 'manage.html')
 

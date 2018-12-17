@@ -74,7 +74,6 @@ class Role(models.Model):
     fun5 = models.BooleanField(default=False)
     fun6 = models.BooleanField(default=False)
     fun7 = models.BooleanField(default=False)
-    fun8 = models.BooleanField(default=False)
 
 class Contract(models.Model):
     contractnum = models.AutoField(primary_key=True)
