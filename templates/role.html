@@ -55,7 +55,9 @@
         </el-row>
     </el-header>
 
-    <el-table ref="save" :data="tableData.filter(data => !search || data.role.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
+    <el-table ref="save"
+              :data="tableData.filter(data => !search || data.role.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
         <el-table-column type="expand">
             <div slot-scope="c">
                 <el-form label-position="left" inline class="demo-table-expand">
@@ -99,7 +101,7 @@
             </el-table-column>
             <el-table-column align="center">
                 <div slot-scope="scope">
-                    <el-button size="mini"  @click="saveRow(scope.row)">保存</el-button>
+                    <el-button size="mini" @click="saveRow(scope.row)">保存</el-button>
                     <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
                 </div>
             </el-table-column>
@@ -186,7 +188,7 @@
         methods: {
             saveRow(tempRow) {
                 vue.fd = new FormData();
-                vue.fd.append("type","save");
+                vue.fd.append("type", "save");
                 vue.fd.append("role", tempRow.role);
                 vue.fd.append("fun1", tempRow.fun1);
                 vue.fd.append("fun2", tempRow.fun2);
@@ -244,22 +246,37 @@
                 this.newRole.description = ''; //客户名
             },
             handleDelete(tempRow) {
-                vue.fd = new FormData();
-                vue.fd.append("type","delete");
-                vue.fd.append("role", tempRow.role);
-                $.ajax({
-                    url: "/role",
-                    type: "POST",
-                    processData: false,
-                    contentType: false,
-                    data: vue.fd,
-                    success: function (data1) {
-                        if (data1.msg == "success") {
-                            window.location.href="/role";
-                            vue.$message.success('删除成功');
+
+                vue.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+
+                    vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("role", tempRow.role);
+                    $.ajax({
+                        url: "/role",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd,
+                        success: function (data1) {
+                            if (data1.msg == "success") {
+                                vue.$message.success('删除成功！');
+                                window.location.href = "";
+                            }
                         }
-                    }
-                })
+                    })
+
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+
             }
         }
     })

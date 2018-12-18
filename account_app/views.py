@@ -27,7 +27,7 @@ def home(request):
     if user.is_anonymous:
         return render(request, 'landing.html')
     else:
-        return redirect('manage')
+        return redirect("manage")
 
 
 # Create your views here.
@@ -73,6 +73,7 @@ def register(request):
                 user.save()
                 res = {'msg': 'success'}
                 return HttpResponse(json.dumps(res))
+
     return render(request, 'register.html')
 
 
@@ -83,7 +84,9 @@ def logout(request):
 
 @login_required
 def manage(request):
-    return render(request, 'manage.html')
+    user = get_user(request)
+    username = user.username
+    return render(request, "manage.html", {'username': username})
 
 
 def myContract(request):
@@ -217,7 +220,34 @@ def role(request):
         return render(request, 'role.html')
 
 def user(request):
-    return render(request, 'user.html')
+    if request.method == "POST":
+        type = request.POST.get('type')
+        if type == "init":
+            results = models.MyUser.objects.all()
+            users = []
+            for result in results:
+                role = result.role.role if result.role else '无'
+                users.append({'username':result.username,'email':result.email,'role':role})
+            return JsonResponse({"users":users})
+        elif type == "save":
+            username = request.POST.get('username')
+            role = request.POST.get('role')
+            role_models = models.Role.objects.get(role=role)
+            user_models = models.MyUser.objects.get(username=username)
+            user_models.role = role_models
+            user_models.save()
+            return HttpResponse('')
+        elif type == "delete":
+            username = request.POST.get('username')
+            user_models = models.MyUser.objects.get(username=username)
+            user_models.delete()
+            return HttpResponse('')
+    else:
+        results = models.Role.objects.all()
+        roles=[]
+        for result in results:
+            roles.append(result.role)
+        return render(request, 'user.html',{'roles':roles})
 
 def myClient(request):
     return render(request, 'myClient.html')

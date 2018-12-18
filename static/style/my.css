@@ -15,3 +15,8 @@
     color: #333;
     line-height: 60px;
   }
+
+  .el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    min-height: 400px;
+}

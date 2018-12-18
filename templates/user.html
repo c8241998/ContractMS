@@ -11,7 +11,133 @@
 </head>
 <body>
 <el-container id="table">
-    用户管理
+    <el-header style="text-align: right; font-size: 12px">
+        <el-row>
+            <el-col :span="8">
+                <el-input placeholder="输入用户名搜索" v-model="search" size="mini" clearable></el-input>
+            </el-col>
+        </el-row>
+    </el-header>
+    <el-table ref="tableChange" :data="tableData.filter(data => !search || data.username.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
+        <el-table-column prop="username" label="用户名" sortable align="center"></el-table-column>
+        <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
+        <el-table-column prop="role" label="角色" align="center">
+            <div slot-scope="scope">
+                <el-select filterable v-model="scope.row.role">
+                    {% for role in roles %}
+                        <el-option label="{{ role }}" value={{ role }}></el-option>
+                    {% endfor %}
+                </el-select>
+            </div>
+        </el-table-column>
+        <el-table-column align="center">
+            <div slot-scope="scope">
+                <el-button size="mini" @click="saveRow(scope.row)">保存</el-button>
+                <el-button size="mini" type="danger" @click="deleteRow(scope.row)">删除</el-button>
+            </div>
+        </el-table-column>
+        </el-table-column>
+
+    </el-table>
 </el-container>
 </body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/user",
+                type: "POST",
+                data: {"type": "init"},
+                success: function (data1) {
+                    var users = data1.users;
+                    for (var i = 0; i < users.length; i++) {
+                        var user = users[i];
+                        vue.tableData.push(
+                            {
+                                username: user.username, //用户名
+                                email: user.email,
+                                role: user.role
+                            }
+                        );
+                    }
+
+                }
+            })
+        },
+        data() {
+            return {
+                tableData: [],
+                delData: [{
+                    username: '', //用户名
+                    email: '',
+                    role: '',
+                }],
+                search: '',
+                fd: '',
+                showAdduser: false,
+            };
+        },
+        methods: {
+            saveRow(tempRow) {
+                vue.fd = new FormData();
+                vue.fd.append("type", "save")
+                vue.fd.append("username", tempRow.username);
+                vue.fd.append("role", tempRow.role);
+                $.ajax({
+                    url: "/user",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: vue.fd,
+                    success: function (data1) {
+                        vue.$message.success("更改角色成功!");
+                    }
+                })
+
+
+            },
+            deleteRow(tempRow) {
+                vue.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+
+                    vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("username", tempRow.username);
+                    $.ajax({
+                        url: "/user",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd
+                        ,
+                        success: function () {
+                            vue.$message({
+                                message: '删除成功!',
+                                type: 'success'
+                            });
+                            window.location.href = "";
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+
+            },
+        }
+    })
+</script>
 </html>
