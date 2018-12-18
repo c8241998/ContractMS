@@ -143,7 +143,24 @@ def myManageContract(request):
     return render(request, 'myManageContract.html')
 
 def setContract(request):
-    return render(request, 'setContract.html')
+    if request.method == "POST":
+        dic = {'0': '待分配', '1': '会签中', '2': '定稿中', '3': '审批中', '4': '签订中', '5': '签订完成'}
+        results = models.Contract.objects.all()
+        contracts = []
+        for result in results:
+            contract = {}
+            contract["contractnum"] = result.contractnum
+            contract["contractname"] = result.contractname
+            contract['clientname'] = result.clientnum.clientname
+            contract['begintime'] = result.begintime.__str__()
+            contract['endtime'] = result.endtime.__str__()
+            contract['state'] = dic.get(result.state.__str__())
+            contract['stateNum'] = result.state
+            contract['draft'] = result.draft.username
+            contracts.append(contract)
+        return JsonResponse({"contracts": contracts})
+    else:
+        return render(request, 'setContract.html')
 
 def allContract(request):
     return render(request, 'allContract.html')

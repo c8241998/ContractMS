@@ -58,10 +58,10 @@
         created: function () {
             // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
             $.ajax({
-                url: "/setCcontract",
+                url: "/setContract",
                 type: "POST",
                 success: function (data1) {
-                    var contracts = JSON.parse(data1).contracts;
+                    let contracts = data1.contracts;
                     for (var i =0;i<contracts.length;i++) {
                         let contract = contracts[i];
                         vue.tableData.push(
@@ -84,53 +84,7 @@
         data() {
             return {
 
-                tableData: [{
-                    contractnum:'001', //合同号
-                    contractname: '合同1', //合同名
-                    clientname:  '张杰', //客户名
-                    begintime: '2018', //开始时间
-                    endtime:   '2019', //结束时间
-                    stateNum:  '0', //状态编号
-                    state:'未分配',
-                    draft:  '谢娜'//起草人
-                    },{
-                    contractnum:'002', //合同号
-                    contractname: '合同2', //合同名
-                    clientname:  '张杰', //客户名
-                    begintime: '2019', //开始时间
-                    endtime:   '2019', //结束时间
-                    stateNum:  '2', //状态编号
-                    state:'定稿中',
-                    draft:  '谢娜'//起草人
-                    },{
-                    contractnum:'003', //合同号
-                    contractname: '合同2', //合同名
-                    clientname:  '张杰', //客户名
-                    begintime: '2019', //开始时间
-                    endtime:   '2019', //结束时间
-                    stateNum:  '3', //状态编号
-                    state:'审核中',
-                    draft:  '谢娜'//起草人
-                    },{
-                    contractnum:'004', //合同号
-                    contractname: '合同2', //合同名
-                    clientname:  '张杰', //客户名
-                    begintime: '2019', //开始时间
-                    endtime:   '2019', //结束时间
-                    stateNum:  '4', //状态编号
-                    state:'签订中',
-                    draft:  '谢娜'//起草人
-                    }
-                    ,{
-                    contractnum:'005', //合同号
-                    contractname: '合同2', //合同名
-                    clientname:  '张杰', //客户名
-                    begintime: '2019', //开始时间
-                    endtime:   '2019', //结束时间
-                    stateNum:  '5', //状态编号
-                    state:'已完成',
-                    draft:  '谢娜'//起草人
-                    }
+                tableData: [
                 ]
             };
         },
