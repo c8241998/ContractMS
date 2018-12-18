@@ -21,13 +21,13 @@
       <el-table-column prop="clientname" label="客户名"></el-table-column>
       <el-table-column prop="begintime" label="开始时间" sortable></el-table-column>
       <el-table-column prop="endtime" label="结束时间" sortable></el-table-column>
-      <el-table-column prop="state" label="状态编号" sortable column-key="state"
-                       :filters="[{ text: '未分配', value: '0' }, { text: '已分配', value: '1'&&'2'&&'3'&&'4'&&'5' }]"
+      <el-table-column prop="stateNum" label="状态" sortable column-key="stateNum"
+                       :filters="[{ text: '未分配', value: ['0'] }, { text: '已分配', value: ['1','2','3','4','5'] }]"
                        :filter-method="filterTag"
                        filter-placement="bottom-end">
           <div slot-scope="scope">
               <el-tag
-                      :type="scope.row.state === '0' ? 'primary' : 'success'"
+                      :type="scope.row.stateNum === '0' ? 'primary' : 'success'"
                       disable-transitions>[[ scope.row.state ]]</el-tag>
           </div>
       </el-table-column>
@@ -35,10 +35,10 @@
       <el-table-column label="分配信息">
           <div slot-scope="scope">
               <el-button size="mini" type="success"
-                         v-show="scope.row.state=='1'||scope.row.state=='2'||scope.row.state=='3'||scope.row.state=='4'||scope.row.state=='5'"
+                         v-show="scope.row.stateNum=='1'||scope.row.stateNum=='2'||scope.row.stateNum=='3'||scope.row.stateNum=='4'||scope.row.stateNum=='5'"
                          @click="handleEdit(scope.$index, scope.row)">查看分配信息
               </el-button>
-              <el-button size="mini" v-show="scope.row.state=='0'" type="primary"
+              <el-button size="mini" v-show="scope.row.stateNum=='0'" type="primary" style="margin-left: 0px;"
                          @click="handleEdit(scope.$index, scope.row)">前去分配管理人员
               </el-button>
           </div>
@@ -71,7 +71,8 @@
                                 clientname: contract.clientname, //客户名
                                 begintime:contract.begintime, //开始时间
                                 endtime: contract.endtime, //结束时间
-                                state: contract.stateNum, //状态编号
+                                stateNum: contract.stateNum, //状态编号
+                                state: contract.state, //状态
                                 draft: contract.draft//起草人
                             }
                         );
@@ -89,7 +90,8 @@
                     clientname:  '张杰', //客户名
                     begintime: '2018', //开始时间
                     endtime:   '2019', //结束时间
-                    state:  '0', //状态编号
+                    stateNum:  '0', //状态编号
+                    state:'未分配',
                     draft:  '谢娜'//起草人
                     },{
                     contractnum:'002', //合同号
@@ -97,7 +99,36 @@
                     clientname:  '张杰', //客户名
                     begintime: '2019', //开始时间
                     endtime:   '2019', //结束时间
-                    state:  '2', //状态编号
+                    stateNum:  '2', //状态编号
+                    state:'定稿中',
+                    draft:  '谢娜'//起草人
+                    },{
+                    contractnum:'003', //合同号
+                    contractname: '合同2', //合同名
+                    clientname:  '张杰', //客户名
+                    begintime: '2019', //开始时间
+                    endtime:   '2019', //结束时间
+                    stateNum:  '3', //状态编号
+                    state:'审核中',
+                    draft:  '谢娜'//起草人
+                    },{
+                    contractnum:'004', //合同号
+                    contractname: '合同2', //合同名
+                    clientname:  '张杰', //客户名
+                    begintime: '2019', //开始时间
+                    endtime:   '2019', //结束时间
+                    stateNum:  '4', //状态编号
+                    state:'签订中',
+                    draft:  '谢娜'//起草人
+                    }
+                    ,{
+                    contractnum:'005', //合同号
+                    contractname: '合同2', //合同名
+                    clientname:  '张杰', //客户名
+                    begintime: '2019', //开始时间
+                    endtime:   '2019', //结束时间
+                    stateNum:  '5', //状态编号
+                    state:'已完成',
                     draft:  '谢娜'//起草人
                     }
                 ]
@@ -105,10 +136,15 @@
         },
         methods: {
             resetDateFilter() {
-                this.$refs.filterTable.clearFilter('state');
+                this.$refs.filterTable.clearFilter('stateNum');
             },
-            filterTag(value, row) {
-                return row.state === value;
+            filterTag(values, row) {
+                for(var i=0;i<values.length;i++){
+                    let value=values[i];
+                    if(row.stateNum===value)
+                        return true;
+                }
+                return false;
             },
             filterHandler(value, row, column) {
                 const property = column['property'];

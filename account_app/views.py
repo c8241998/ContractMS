@@ -7,6 +7,7 @@ from account_app import models
 import time
 import json
 from django.http import FileResponse
+from django.http import JsonResponse
 
 # Create your views here.
 def add(request):
@@ -148,7 +149,55 @@ def allContract(request):
     return render(request, 'allContract.html')
 
 def role(request):
-    return render(request, 'role.html')
+    if request.method == "POST":
+        type=request.POST.get('type')
+        if type=='addRole':
+            role = request.POST.get('role')
+            description = request.POST.get('description')
+            try:
+                temp = models.Role.objects.get(role=role)
+                return JsonResponse({"msg": "fail", "info": "角色名已存在"})
+            except models.Role.DoesNotExist:
+                newRole = models.Role()
+                newRole.role = role
+                newRole.description = description
+                newRole.save()
+                return JsonResponse({"msg":"success"})
+        elif type=='init':
+            results = models.Role.objects.all()
+            roles = []
+            for result in results:
+                roles.append({'role':result.role,'description':result.description,
+                              'fun1':result.fun1,'fun2':result.fun2,
+                              'fun3': result.fun3,'fun4':result.fun4,
+                              'fun5': result.fun5,'fun6':result.fun6
+                              })
+            return JsonResponse({"roles":roles})
+        elif type=='save':
+            dic={"true":True,'false':False}
+            role = request.POST.get('role')
+            fun1 = request.POST.get('fun1')
+            fun2 = request.POST.get('fun2')
+            fun3 = request.POST.get('fun3')
+            fun4 = request.POST.get('fun4')
+            fun5 = request.POST.get('fun5')
+            fun6 = request.POST.get('fun6')
+            role_models = models.Role.objects.get(role=role)
+            role_models.fun1 = dic[fun1]
+            role_models.fun2 = dic[fun2]
+            role_models.fun3 = dic[fun3]
+            role_models.fun4 = dic[fun4]
+            role_models.fun5 = dic[fun5]
+            role_models.fun6 = dic[fun6]
+            role_models.save()
+            return JsonResponse({"msg":"success"})
+        elif type=='delete':
+            role = request.POST.get('role')
+            role_models = models.Role.objects.get(role=role)
+            role_models.delete()
+            return JsonResponse({"msg": "success"})
+    else:
+        return render(request, 'role.html')
 
 def user(request):
     return render(request, 'user.html')

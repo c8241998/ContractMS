@@ -156,6 +156,33 @@
             })
         },
         data() {
+            var validateBegintime= (rule, value, callback) => {
+                if (value > vue.form.endtime && vue.form.endtime!='') {
+                    callback(new Error('请选择合理的生效时间'));
+                }
+                else {
+                    callback();
+                }
+            };
+            var validateEndtime= (rule, value, callback) => {
+                if (value < vue.form.begintime) {
+                    callback(new Error('请选择合理的失效时间'));
+                }
+                else {
+                    callback();
+                }
+            };
+            var validateContent= (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请输入合同内容'));
+                }
+                else if(value.length >= 200){
+                    callback(new Error('长度不得超过200，建议您使用附件上传'));
+                }
+                else {
+                    callback();
+                }
+            };
             return {
                 showNewcontract: false,
                 fd: '',   // formdata  提交表单前存储所有表单内数据 用于发送
@@ -170,9 +197,17 @@
                 rules: {
                     contractname: [{required: true, message: '请输入合同名称', trigger: 'blur'}], //合同名
                     clientname: [{required: true, message: '请选择客户姓名', trigger: 'blur'}], //客户名
-                    begintime: [{required: true, message: '请选择合同生效时间', trigger: 'blur'}], //开始时间
-                    endtime: [{required: true, message: '请选择合同失效时间', trigger: 'blur'}], //结束时间
-                    content: [{required: true, message: '请输入合同内容', trigger: 'blur'}]
+                    begintime: [
+                        {required: true, message: '请选择合同生效时间', trigger: 'blur'},
+                        {validator:validateBegintime,  trigger: 'blur'}
+                    ], //开始时间
+                    endtime: [
+                        {required: true, message: '请选择合同失效时间', trigger: 'blur'},
+                        {validator:validateEndtime,  trigger: 'blur'}
+                    ], //结束时间
+                    content: [
+                        {validator:validateContent, trigger: 'blur'}
+                    ]
                 },
                 formLabelWidth: '100px',
 

@@ -11,7 +11,257 @@
 </head>
 <body>
 <el-container id="table">
-    角色管理
+    <el-dialog title="权限说明" :visible.sync="showInfo">
+        <el-table :data="information">
+            <el-table-column property="name" label="权限名" width="150"></el-table-column>
+            <el-table-column property="info" label="权限说明"></el-table-column>
+        </el-table>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showInfo = false">我知道啦</el-button>
+        </div>
+    </el-dialog>
+
+    <el-dialog title="添加角色" :visible.sync="showAddrole">
+        <el-form :model="newRole" ref="add" :rules="rules">
+            <el-form-item label="角色名称" :label-width="formLabelWidth" prop="role">
+                <el-input v-model="newRole.role" placeholder="请输入内容" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="角色描述" :label-width="formLabelWidth" prop="description">
+                <el-input type="textarea" autosize placeholder="请输入内容" v-model="newRole.description"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear();">重 置</el-button>
+            <el-button type="primary" @click="addRole">提 交</el-button>
+        </div>
+
+    </el-dialog>
+
+    <el-header style="text-align: right; font-size: 12px">
+        <el-row :gutter="20">
+            <el-col :span="8">
+                <el-input
+                        placeholder="输入角色名搜索"
+                        v-model="search"
+                        size="mini"
+                        clearable>
+                </el-input>
+                <el-button>搜索</el-button>
+            </el-col>
+            <el-col :span="16">
+                <el-button @click="showInfo=true">权限说明</el-button>
+                <el-button icon="el-icon-circle-plus-outline" @click="showAddrole=true">添加角色</el-button>
+            </el-col>
+        </el-row>
+    </el-header>
+
+    <el-table ref="save" :data="tableData.filter(data => !search || data.role.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
+        <el-table-column type="expand">
+            <div slot-scope="c">
+                <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="角色描述">
+                        <span>[[ c.row.description ]]</span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-table-column>
+        <el-table-column prop="role" label="角色名" sortable align="center"></el-table-column>
+        <el-table-column label="权限" align="center">
+            <el-table-column prop="fun1" label="合同管理" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun1"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column prop="fun2" label="流程管理1" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun2"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column prop="fun3" label="流程管理2" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun3"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column prop="fun4" label="用户管理" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun4"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column prop="fun5" label="角色管理" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun5"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column prop="fun6" label="客户管理" align="center">
+                <div slot-scope="scope">
+                    <el-switch v-model="scope.row.fun6"></el-switch>
+                </div>
+            </el-table-column>
+            <el-table-column align="center">
+                <div slot-scope="scope">
+                    <el-button size="mini"  @click="saveRow(scope.row)">保存</el-button>
+                    <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                </div>
+            </el-table-column>
+        </el-table-column>
+
+    </el-table>
 </el-container>
 </body>
+
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/role",
+                type: "POST",
+                data: {"type": "init"},
+                success: function (data1) {
+                    let roles = data1.roles;
+                    for (var i = 0; i < roles.length; i++) {
+                        let role = roles[i];
+                        vue.tableData.push(
+                            {
+                                role: role.role, //角色名
+                                description: role.description,//描述
+                                fun1: role.fun1, //合同管理
+                                fun2: role.fun2, //流程管理1
+                                fun3: role.fun3, //流程管理2
+                                fun4: role.fun4, //用户管理
+                                fun5: role.fun5, //角色管理
+                                fun6: role.fun6, //客户管理
+                            }
+                        );
+                    }
+
+                }
+            })
+        },
+        data() {
+            return {
+                fd: '',
+                showInfo: false,
+                showAddrole: false,
+                tableData: [],
+                information: [
+                    {
+                        name: '合同管理',
+                        info: ''
+                    }, {
+                        name: '流程管理1',
+                        info: ''
+                    }, {
+                        name: '流程管理2',
+                        info: ''
+                    }, {
+                        name: '用户管理',
+                        info: ''
+                    }, {
+                        name: '角色管理',
+                        info: ''
+                    }, {
+                        name: '客户管理',
+                        info: ''
+                    }],
+                newRole: {
+                    role: '', //角色名
+                    description: '',//描述
+                },
+                formLabelWidth: '100px',
+                search: '',
+                rules: {
+                    role: [{required: true, message: '请输入角色名称', trigger: 'blur'}], //角色名
+                    description: [{required: true, message: '请输入角色描述', trigger: 'blur'}], //角色描述
+                },
+            };
+        },
+        methods: {
+            saveRow(tempRow) {
+                vue.fd = new FormData();
+                vue.fd.append("type","save");
+                vue.fd.append("role", tempRow.role);
+                vue.fd.append("fun1", tempRow.fun1);
+                vue.fd.append("fun2", tempRow.fun2);
+                vue.fd.append("fun3", tempRow.fun3);
+                vue.fd.append("fun4", tempRow.fun4);
+                vue.fd.append("fun5", tempRow.fun5);
+                vue.fd.append("fun6", tempRow.fun6);
+                $.ajax({
+                    url: "/role",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: vue.fd
+                    ,
+                    success: function (data1) {
+                        if (data1.msg == "success") {
+                            vue.$message.success('修改成功');
+                        }
+                    }
+                })
+            },
+            addRole() {
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        {#this.$refs.upload.submit();#}
+                        vue.fd = new FormData();
+                        vue.fd.append("type", "addRole");
+                        vue.fd.append("role", this.newRole.role);
+                        vue.fd.append("description", this.newRole.description);
+
+                        $.ajax({
+                            url: "/role",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd,
+                            success: function (data1) {
+                                if (data1.msg == 'success') {
+                                    vue.$message.success('成功添加角色!');
+                                    window.location.href = "/role";
+                                }
+                                else {
+                                    vue.$message.error(data1.info);
+                                }
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+
+            },
+            clear() {
+                this.newRole.role = ''; //合同名
+                this.newRole.description = ''; //客户名
+            },
+            handleDelete(tempRow) {
+                vue.fd = new FormData();
+                vue.fd.append("type","delete");
+                vue.fd.append("role", tempRow.role);
+                $.ajax({
+                    url: "/role",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: vue.fd,
+                    success: function (data1) {
+                        if (data1.msg == "success") {
+                            window.location.href="/role";
+                            vue.$message.success('删除成功');
+                        }
+                    }
+                })
+            }
+        }
+    })
+</script>
 </html>
