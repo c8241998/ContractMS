@@ -11,16 +11,6 @@ html,body{
     text-align: center
 }
 
-.logo{
-    width: 360px;
-    height: 105px;
-    left: 50%;
-    margin-left: -180px;
-    top: 6%;
-    background-image: url(../image/logoblue.png);
-    background-size: cover;
-    position: absolute;
-}
 
 .login_frame{
     width: 420px;
@@ -28,7 +18,7 @@ html,body{
     top: 50%;
     left: 50%;
     margin-top: -280px;
-    margin-left: -210px;
+    margin-left: -440px;
     background-color:rgba(255, 255, 255, 0.75);
     border-radius: 50px;
     position: absolute;

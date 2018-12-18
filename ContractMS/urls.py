@@ -19,7 +19,6 @@ from account_app import views
 from django.conf.urls import include, url
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
     url(r'admin/', admin.site.urls),
     url(r'^login$', views.login, name='login'),
     url(r'^register$', views.register, name='register'),
@@ -37,7 +36,4 @@ urlpatterns = [
     url(r'^allClient$', views.allClient, name='allClient'),
     url(r'^log$', views.log, name='log'),
     url(r'^downloadFile$', views.downloadFile, name='downloadFile'),
-
-    url(r'^add$', views.add, name='add'),
-    url(r'^query$', views.query, name='query'),
 ]

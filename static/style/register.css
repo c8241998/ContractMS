@@ -11,24 +11,13 @@ html,body{
     text-align: center
 }
 
-.logo{
-    width: 360px;
-    height: 105px;
-    left: 50%;
-    margin-left: -180px;
-    top: 6%;
-    background-image: url(../image/logoblue.png);
-    background-size: cover;
-    position: absolute;
-}
-
 .register_frame{
     width: 420px;
     height: 560px;
     top: 50%;
     left: 50%;
     margin-top: -280px;
-    margin-left: -210px;
+    margin-left: -440px;
     background-color:rgba(255, 255, 255, 0.75);
     border-radius: 50px;
     /* opacity: 0.75; */

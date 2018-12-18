@@ -10,17 +10,6 @@ from django.http import FileResponse
 from django.http import JsonResponse
 
 # Create your views here.
-def add(request):
-    # if request.method == "POST":
-    res = {'msg': 'success'}
-    return HttpResponse(json.dumps(res))
-
-
-def query(request):
-    if request.method == "GET":
-        res = {'msg': 'success'}
-        return HttpResponse(json.dumps(res))
-
 
 def home(request):
     user = get_user(request)
