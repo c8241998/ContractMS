@@ -107,15 +107,35 @@
 <script>
     var index = new Vue({
         el: '#index',
+        created: function () {
+            this.setmyheight();
+            $.ajax({
+                url: "/manage",
+                type: "POST",
+                success: function (data1) {
+                    index.role.fun1 = data1.fun1;
+                    index.role.fun2 = data1.fun2;
+                    index.role.fun3 = data1.fun3;
+                    index.role.fun4 = data1.fun4;
+                    index.role.fun5 = data1.fun5;
+                    index.role.fun6 = data1.fun6;
+                }
+            })
+        },
         data() {
             return {
                 isCollapse: true,
                 iframeScr: '',
                 myheight: '',
+                role: {
+                    fun1: false,
+                    fun2: false,
+                    fun3: false,
+                    fun4: false,
+                    fun5: false,
+                    fun6: false,
+                }
             };
-        },
-        created() {
-            this.setmyheight()
         },
         methods: {
             handleOpen(key, keyPath) {
@@ -125,7 +145,20 @@
                 console.log(key, keyPath);
             },
             setiframeScr(scr) {
-                this.iframeScr = scr;
+                let role_ = index.role;
+                let ok = true;
+                if(scr==='allContract'&&!role_.fun1) ok=false;
+                if(scr==='myManageContract'&&!role_.fun2) ok=false;
+                if(scr==='setContract'&&!role_.fun3) ok=false;
+                if(scr==='user'&&!role_.fun4) ok=false;
+                if(scr==='role'&&!role_.fun5) ok=false;
+                if(scr==='allClient'&&!role_.fun6) ok=false;
+
+                if(!ok){
+                    index.$message.error("对不起，您没有权限访问！");
+                } else{
+                    this.iframeScr = scr;
+                }
             },
             setmyheight() {
                 this.myheight = window.innerHeight - 60 + 'px';

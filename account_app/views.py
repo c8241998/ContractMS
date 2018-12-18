@@ -75,7 +75,20 @@ def logout(request):
 def manage(request):
     user = get_user(request)
     username = user.username
-    return render(request, "manage.html", {'username': username})
+    if request.method == "POST":
+        user_models = models.MyUser.objects.get(username=username)
+        return JsonResponse(
+            {
+                'fun1': user_models.role.fun1,
+                'fun2': user_models.role.fun2,
+                'fun3': user_models.role.fun3,
+                'fun4': user_models.role.fun4,
+                'fun5': user_models.role.fun5,
+                'fun6': user_models.role.fun6,
+             }
+        )
+    else:
+        return render(request, "manage.html", {'username': username})
 
 
 def myContract(request):
@@ -90,7 +103,8 @@ def myContract(request):
             contract = {}
             contract["contractnum"] = result.contractnum
             contract["contractname"] = result.contractname
-            contract['clientname'] = result.clientnum.clientname
+            clientname = result.clientnum.clientname if result.clientnum else '客户资料已被删除'
+            contract['clientname'] = clientname
             contract['begintime'] = result.begintime.__str__()
             contract['endtime'] = result.endtime.__str__()
             contract['state'] = dic.get(result.state.__str__())
@@ -143,7 +157,8 @@ def setContract(request):
             contract = {}
             contract["contractnum"] = result.contractnum
             contract["contractname"] = result.contractname
-            contract['clientname'] = result.clientnum.clientname
+            clientname = result.clientnum.clientname if result.clientnum else '客户资料已被删除'
+            contract['clientname'] = clientname
             contract['begintime'] = result.begintime.__str__()
             contract['endtime'] = result.endtime.__str__()
             contract['state'] = dic.get(result.state.__str__())
