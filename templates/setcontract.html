@@ -17,49 +17,53 @@
             <el-table-column prop="opinion" label="会签意见"></el-table-column>
             <el-table-column prop="ctime" label="会签时间" width="150"></el-table-column>
         </el-table>
-         <el-table :data="contractInfo.approval">
+        <el-table :data="contractInfo.approval">
             <el-table-column prop="approvalPerson" label="审批人" width="150"></el-table-column>
             <el-table-column prop="astate" label="审批结果"></el-table-column>
             <el-table-column prop="atime" label="审批时间" width="150"></el-table-column>
         </el-table>
-         <el-table :data="contractInfo.sign">
+        <el-table :data="contractInfo.sign">
             <el-table-column prop="signPerson" label="签订人" width="150"></el-table-column>
             <el-table-column prop="sinformation" label="签订信息"></el-table-column>
             <el-table-column prop="stime" label="签订时间" width="150"></el-table-column>
         </el-table>
-        <div slot="footer" class="dialog-footer">
-            <el-button @click="showInfo = false">我知道啦</el-button>
-        </div>
     </el-dialog>
 
     <el-dialog title="分配合同管理人员" :visible.sync="showSetContract" width="40%">
-        <el-form :model="setContract" ref="set" :rules="rules">
-            <el-collapse v-model="activeName" accordion>
+        <el-form ref="set">
+            {#            :model="setContract"#}
+            <el-collapse accordion>
                 <el-collapse-item title="会签" name="1">
                     <el-transfer
                             :titles="['备选用户', '会签人']"
                             v-model="value_contract"
-                            :data="usernames1">
+                            :data="usernames1"
+                            @change="onchange('contract')"
+                    >
                     </el-transfer>
                 </el-collapse-item>
                 <el-collapse-item title="审批" name="2">
                     <el-transfer
                             :titles="['备选用户', '审批人']"
                             v-model="value_approval"
-                            :data="usernames2">
+                            :data="usernames2"
+                            @change="onchange('approval')"
+                    >
                     </el-transfer>
                 </el-collapse-item>
                 <el-collapse-item title="签订" name="3">
                     <el-transfer
                             :titles="['备选用户', '签订人']"
                             v-model="value_sign"
-                            :data="usernames3">
+                            :data="usernames3"
+                            @change="onchange('sign')"
+                    >
                     </el-transfer>
                 </el-collapse-item>
             </el-collapse>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="setContract">提 交</el-button>
+            <el-button type="primary" @click="setContract_">提 交</el-button>
         </div>
     </el-dialog>
 
@@ -67,35 +71,36 @@
         <el-button @click="resetDateFilter">清除合同状态过滤器</el-button>
     </el-header>
 
-  <el-table ref="filterTable" :data="tableData" style="width: 100%">
-      <el-table-column prop="contractnum" label="合同号" sortable></el-table-column>
-      <el-table-column prop="contractname" label="合同名"></el-table-column>
-      <el-table-column prop="clientname" label="客户名"></el-table-column>
-      <el-table-column prop="begintime" label="开始时间" sortable></el-table-column>
-      <el-table-column prop="endtime" label="结束时间" sortable></el-table-column>
-      <el-table-column prop="stateNum" label="状态" sortable column-key="stateNum"
-                       :filters="[{ text: '未分配', value: ['0'] }, { text: '已分配', value: ['1','2','3','4','5'] }]"
-                       :filter-method="filterTag"
-                       filter-placement="bottom-end">
-          <div slot-scope="scope">
-              <el-tag
-                      :type="scope.row.stateNum === '0' ? 'primary' : 'success'"
-                      disable-transitions>[[ scope.row.state ]]</el-tag>
-          </div>
-      </el-table-column>
-      <el-table-column prop="draft" label="起草人"></el-table-column>
-      <el-table-column label="分配信息">
-          <div slot-scope="scope">
-              <el-button size="mini" type="success"
-                         v-show="scope.row.stateNum=='1'||scope.row.stateNum=='2'||scope.row.stateNum=='3'||scope.row.stateNum=='4'||scope.row.stateNum=='5'"
-                         @click="showContractInfoOpen(scope.row)">查看分配信息
-              </el-button>
-              <el-button size="mini" v-show="scope.row.stateNum=='0'" type="primary" style="margin-left: 0px;"
-                         @click="setContractOpen(scope.row)">前去分配管理人员
-              </el-button>
-          </div>
-      </el-table-column>
-  </el-table>
+    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+        <el-table-column prop="contractnum" label="合同号" sortable></el-table-column>
+        <el-table-column prop="contractname" label="合同名"></el-table-column>
+        <el-table-column prop="clientname" label="客户名"></el-table-column>
+        <el-table-column prop="begintime" label="开始时间" sortable></el-table-column>
+        <el-table-column prop="endtime" label="结束时间" sortable></el-table-column>
+        <el-table-column prop="stateNum" label="状态" sortable column-key="stateNum"
+                         :filters="[{ text: '未分配', value: ['0'] }, { text: '已分配', value: ['1','2','3','4','5'] }]"
+                         :filter-method="filterTag"
+                         filter-placement="bottom-end">
+            <div slot-scope="scope">
+                <el-tag
+                        :type="scope.row.stateNum === '0' ? 'primary' : 'success'"
+                        disable-transitions>[[ scope.row.state ]]
+                </el-tag>
+            </div>
+        </el-table-column>
+        <el-table-column prop="draft" label="起草人"></el-table-column>
+        <el-table-column label="分配信息">
+            <div slot-scope="scope">
+                <el-button size="mini" type="success"
+                           v-show="scope.row.stateNum=='1'||scope.row.stateNum=='2'||scope.row.stateNum=='3'||scope.row.stateNum=='4'||scope.row.stateNum=='5'"
+                           @click="showContractInfoOpen(scope.row)">查看分配信息
+                </el-button>
+                <el-button size="mini" v-show="scope.row.stateNum=='0'" type="primary" style="margin-left: 0px;"
+                           @click="setContractOpen(scope.row)">前去分配管理人员
+                </el-button>
+            </div>
+        </el-table-column>
+    </el-table>
 </el-container>
 </body>
 
@@ -112,16 +117,17 @@
             $.ajax({
                 url: "/setContract",
                 type: "POST",
+                data: {"type": "init"},
                 success: function (data1) {
                     let contracts = data1.contracts;
-                    for (var i =0;i<contracts.length;i++) {
+                    for (var i = 0; i < contracts.length; i++) {
                         let contract = contracts[i];
                         vue.tableData.push(
                             {
                                 contractnum: contract.contractnum, //合同号
                                 contractname: contract.contractname, //合同名
                                 clientname: contract.clientname, //客户名
-                                begintime:contract.begintime, //开始时间
+                                begintime: contract.begintime, //开始时间
                                 endtime: contract.endtime, //结束时间
                                 stateNum: contract.stateNum, //状态编号
                                 state: contract.state, //状态
@@ -130,70 +136,40 @@
                         );
                     }
 
+                    let users = data1.users;
+                    for (var i = 0; i < users.length; i++) {
+                        vue.usernames.push(users[i]);
+                    }
                 }
             });
-            $.ajax({
-                    url: "/getUsernames",
-                    type: "POST",
-                    success: function (data1) {
-                        var users = JSON.parse(data1).users;
-                        for (var i = 0; i < users.length; i++) {
-                            let user = users[i];
-                            vue.usernames.push(
-                                user.username,
-                            );
-                        }
-                    }
-                })
-
         },
         data() {
             return {
-                tableData: [{
-                    contractnum: '001', //合同号
-                    contractname: '', //合同名
-                    clientname: '', //客户名
-                    begintime: '', //开始时间
-                    endtime: '', //结束时间
-                    stateNum: '0', //状态编号
-                    state: '未分配', //状态
-                    draft: ''//起草人
-                },{
-                    contractnum: '002', //合同号
-                    contractname: '', //合同名
-                    clientname: '', //客户名
-                    begintime: '', //开始时间
-                    endtime: '', //结束时间
-                    stateNum: '1', //状态编号
-                    state: '会签中', //状态
-                    draft: ''//起草人
-                }],
+                tableData: [],
 
                 showSetContract: false,
-                usernames:['aaa','bbb','ccc','ddd'],
-                usernames1:[],
+                usernames: [],
+                usernames1: [],
                 value_contract: [],
-                usernames2:[],
+                usernames2: [],
                 value_approval: [],
-                usernames3:[],
+                usernames3: [],
                 value_sign: [],
 
-                setContract:[{
+                setContract: [{
                     contractnum: '',
-                    countersign1:'',
-                    countersign2:'',
-                    countersign3:'',
-                    approval1:'',
-                    approval2:'',
-                    approval3:'',
-                    sign:'',
+                    countersign1: '',
+                    countersign2: '',
+                    countersign3: '',
+                    approval1: '',
+                    approval2: '',
+                    approval3: '',
+                    sign: '',
                 }],
                 formLabelWidth: '100px',
-                showContractInfo:false,
-                contractInfo:[
-
-                ],
-                fd:'',
+                showContractInfo: false,
+                contractInfo: [],
+                fd: '',
             };
         },
         methods: {
@@ -201,9 +177,9 @@
                 this.$refs.filterTable.clearFilter('stateNum');
             },
             filterTag(values, row) {
-                for(var i=0;i<values.length;i++){
-                    let value=values[i];
-                    if(row.stateNum===value)
+                for (var i = 0; i < values.length; i++) {
+                    let value = values[i];
+                    if (row.stateNum === value)
                         return true;
                 }
                 return false;
@@ -212,73 +188,89 @@
                 const property = column['property'];
                 return row[property] === value;
             },
-            setContractOpen(row){
-                this.showSetContract=true;
-                this.setContract.contractnum=row.contractnum;
+            setContractOpen(row) {
+                this.showSetContract = true;
+                this.setContract.contractnum = row.contractnum;
                 this.usernames.forEach((username, index) => {
                     this.usernames1.push({
                         label: username,
-                        key: index,
+                        key: username,
                     });
                     this.usernames2.push({
                         label: username,
-                        key: index,
+                        key: username,
                     });
                     this.usernames3.push({
                         label: username,
-                        key: index,
+                        key: username,
                     });
                 });
             },
-            setContract(){
-                if(this.value_contract.length===0){
+            setContract_() {
+
+                if (this.value_contract.length === 0) {
                     vue.$message.error('请分配会签人员！');
                     return false;
                 }
-                if(this.value_approval.length===0){
+                if (this.value_approval.length === 0) {
                     vue.$message.error('请分配审批人员！');
                     return false;
                 }
-                if(this.value_sign.length===0){
+                if (this.value_sign.length === 0) {
                     vue.$message.error('请分配签订人员！');
                     return false;
                 }
-                if(this.value_contract.length>3){
-                    vue.$message.error('会签人数大于3，请重新分配！');
-                    return false;
+
+                this.setContract.countersign1 = this.value_contract[0];
+                if (this.value_contract[1]) {
+                    this.setContract.countersign2 = this.value_contract[1];
                 }
-                if(this.value_approval.length>3){
-                    vue.$message.error('审批人数大于3，请重新分配！');
-                    return false;
+                if (this.value_contract[2]) {
+                    this.setContract.countersign3 = this.value_contract[2];
                 }
-                if(this.value_sign.length>1){
-                    vue.$message.error('签订人数大于1，请重新分配！');
-                    return false;
+                this.setContract.approval1 = this.value_approval[0];
+                if (this.value_approval[1]) {
+                    this.setContract.approval2 = this.value_approval[1];
                 }
-                this.setContract.countersign1=this.value_contract[0];
-                if(this.value_contract[1]){
-                    this.setContract.countersign2=this.value_contract[1];
+                if (this.value_approval[2]) {
+                    this.setContract.approval3 = this.value_approval[2];
                 }
-                 if(this.value_contract[2]){
-                    this.setContract.countersign3=this.value_contract[2];
-                }
-                this.setContract.approval1=this.value_approval[0];
-                 if(this.value_approval[1]){
-                    this.setContract.approval2=this.value_approval[1];
-                }
-                 if(this.value_approval[2]){
-                    this.setContract.approval3=this.value_approval[2];
-                }
-                this.setContract.sign=this.value_sign[0];
+                this.setContract.sign = this.value_sign[0];
+
                 vue.fd = new FormData();
+                vue.fd.append("type", "distribution");
                 vue.fd.append("contractnum", this.setContract.contractnum);
                 vue.fd.append("countersign1", this.setContract.countersign1);
-                vue.fd.append("countersign2", this.setContract.countersign2);
-                vue.fd.append("countersign3", this.setContract.countersign3);
+                if(this.setContract.countersign2)
+                    vue.fd.append("countersign2", this.setContract.countersign2);
+                else
+                    vue.fd.append("countersign2", "");
+                if(this.setContract.countersign3)
+                    vue.fd.append("countersign3", this.setContract.countersign3);
+                else
+                    vue.fd.append("countersign3", "");
                 vue.fd.append("approval1", this.setContract.approval1);
-                vue.fd.append("approval2", this.setContract.approval2);
-                vue.fd.append("approval3", this.setContract.approval3);
+                if(this.setContract.approval2)
+                    vue.fd.append("approval2", this.setContract.approval2);
+                else
+                    vue.fd.append("approval2", "");
+                if(this.setContract.approval3)
+                    vue.fd.append("approval3", this.setContract.approval3);
+                else
+                    vue.fd.append("approval3", "");
                 vue.fd.append("sign", this.setContract.sign);
+
+                vue.setContract=[{
+                    contractnum: '',
+                    countersign1: '',
+                    countersign2: '',
+                    countersign3: '',
+                    approval1: '',
+                    approval2: '',
+                    approval3: '',
+                    sign: '',
+                }];
+
                 $.ajax({
                     url: "/setContract",
                     type: "POST",
@@ -287,43 +279,37 @@
                     data: vue.fd
                     ,
                     success: function (data1) {
-                        var msg = JSON.parse(data1);
-                        if (msg["msg"] == "success") {
-                            vue.$message({
-                                message: '保存成功!',
-                                type: 'success'
-                            });
-                            vue.showNewcontract = false;
-                        }
-                        else if (msg["msg"] == "fail") {
-                            vue.$message.error('保存失败！');
-                        }
+                        vue.$message.success('分配成功！');
+                        window.location.href="";
                     }
                 })
             },
             showContractInfoOpen(row) {
                 this.showContractInfo = true;
                 $.ajax({
-                    url: "/getContractInfo",
+                    url: "/setContract",
                     type: "POST",
+                    data:{"type":"info","contractnum":row.contractnum},
                     success: function (data1) {
-                        var cInfo = JSON.parse(data1).cInfo;
-                        vue.contractInfo.push(
+                        var cInfo = data1.cInfo;
+                        vue.contractInfo=
                             {
-                                contractnum: row.contractnum,
-                                countersign: [{
+                                contractnum: cInfo.contractnum,
+                                countersign: [
+                                    {
                                     countersignPerson: cInfo.countersign1,
-                                    opinion: cInfo.opinion1,
+                                    opinion: cInfo.option1,
                                     ctime: cInfo.ctime1,
                                 }, {
                                     countersignPerson: cInfo.countersign2,
-                                    opinion: cInfo.opinion2,
+                                    opinion: cInfo.option2,
                                     ctime: cInfo.ctime2,
                                 }, {
                                     countersignPerson: cInfo.countersign3,
-                                    opinion: cInfo.opinion3,
+                                    opinion: cInfo.option3,
                                     ctime: cInfo.ctime3,
-                                }],
+                                }
+                                ],
                                 approval: [{
                                     approvalPerson: cInfo.approval1,
                                     astate: cInfo.astate1,
@@ -343,10 +329,30 @@
                                     stime: cInfo.stime,
                                 }],
                             }
-                        );
+                        {#);#}
                     }
                 })
             },
+            onchange(form) {
+                if (form === 'contract') {
+                    if (vue.value_contract.length == 4) {
+                        vue.$message.error("最多只能分配三名会签人员！");
+                        vue.value_contract.pop();
+                    }
+                }
+                else if (form === 'approval') {
+                    if (vue.value_approval.length == 4) {
+                        vue.$message.error("最多只能分配三名审批人员！");
+                        vue.value_approval.pop();
+                    }
+                }
+                else if (form === 'sign') {
+                    if (vue.value_sign.length == 2) {
+                        vue.$message.error("最多只能分配一名签订人员！");
+                        vue.value_sign.pop();
+                    }
+                }
+            }
         }
     })
 </script>

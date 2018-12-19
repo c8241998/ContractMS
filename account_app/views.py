@@ -128,9 +128,6 @@ def myContract(request):
         json_={'clients':res}
         return render(request,"mycontract.html",json_)
 
-def setContract(request):
-    return render(request, 'setcontract.html')
-
 def newContract(request):
     if request.method == "POST":
         contractname = request.POST.get("contractname")
@@ -154,22 +151,98 @@ def myManageContract(request):
 
 def setContract(request):
     if request.method == "POST":
-        dic = {'0': '待分配', '1': '会签中', '2': '定稿中', '3': '审批中', '4': '签订中', '5': '签订完成'}
-        results = models.Contract.objects.all()
-        contracts = []
-        for result in results:
-            contract = {}
-            contract["contractnum"] = result.contractnum
-            contract["contractname"] = result.contractname
-            clientname = result.clientnum.clientname if result.clientnum else '客户资料已被删除'
-            contract['clientname'] = clientname
-            contract['begintime'] = result.begintime.__str__()
-            contract['endtime'] = result.endtime.__str__()
-            contract['state'] = dic.get(result.state.__str__())
-            contract['stateNum'] = result.state
-            contract['draft'] = result.draft.username
-            contracts.append(contract)
-        return JsonResponse({"contracts": contracts})
+        if(request.POST.get("type")=="init"):
+
+            dic = {'0': '待分配', '1': '会签中', '2': '定稿中', '3': '审批中', '4': '签订中', '5': '签订完成'}
+            results = models.Contract.objects.all()
+            contracts = []
+            for result in results:
+                contract = {}
+                contract["contractnum"] = result.contractnum
+                contract["contractname"] = result.contractname
+                clientname = result.clientnum.clientname if result.clientnum else '(客户已被删除)'
+                contract['clientname'] = clientname
+                contract['begintime'] = result.begintime.__str__()
+                contract['endtime'] = result.endtime.__str__()
+                contract['state'] = dic.get(result.state.__str__())
+                contract['stateNum'] = result.state.__str__()
+                contract['draft'] = result.draft.username
+                contracts.append(contract)
+
+            results = models.MyUser.objects.filter(role__fun2=True)
+            users = []
+            for result in results:
+                users.append(result.username)
+
+            return JsonResponse({"contracts": contracts,"users":users})
+
+        if (request.POST.get("type") == "distribution"):
+            contractnum = request.POST.get("contractnum")
+            countersign1 = request.POST.get("countersign1")
+            countersign2 = request.POST.get("countersign2")
+            countersign3 = request.POST.get("countersign3")
+            approval1 = request.POST.get("approval1")
+            approval2 = request.POST.get("approval2")
+            approval3 = request.POST.get("approval3")
+            sign = request.POST.get("sign")
+
+            contract = models.Contract.objects.get(contractnum=contractnum)
+            administration = models.Administration()
+            administration.contractnum = contract
+            administration.countersign1 = models.MyUser.objects.get(username=countersign1)
+            if countersign2:
+                administration.countersign2 = models.MyUser.objects.get(username=countersign2)
+            if countersign3:
+                administration.countersign3 = models.MyUser.objects.get(username=countersign3)
+            administration.approval1 = models.MyUser.objects.get(username=approval1)
+            if approval2:
+                administration.approval2 = models.MyUser.objects.get(username=approval2)
+            if approval3:
+                administration.approval3 = models.MyUser.objects.get(username=approval3)
+            administration.sign = models.MyUser.objects.get(username=sign)
+            administration.save()
+
+            contract.state = 1
+            contract.save()
+
+            return HttpResponse('')
+
+        if(request.POST.get("type")=="info"):
+            contractnum = request.POST.get("contractnum")
+            contract = models.Contract.objects.get(contractnum=contractnum)
+            administration = models.Administration.objects.get(contractnum=contract)
+            cInfo = {}
+            cInfo['contractnum'] = contractnum
+
+            cInfo['countersign1'] = administration.countersign1.username if administration.countersign1 else "无"
+            cInfo['countersign2'] = administration.countersign2.username if administration.countersign2 else "无"
+            cInfo['countersign3'] = administration.countersign3.username if administration.countersign3 else "无"
+
+            cInfo['option1'] = administration.option1 if administration.option1 else "无"
+            cInfo['option2'] = administration.option2 if administration.option2 else "无"
+            cInfo['option3'] = administration.option3 if administration.option3 else "无"
+
+            cInfo['ctime1'] = administration.ctime1.__str__() if administration.ctime1 else "无"
+            cInfo['ctime2'] = administration.ctime2.__str__() if administration.ctime2 else "无"
+            cInfo['ctime3'] = administration.ctime3.__str__() if administration.ctime3 else "无"
+
+            cInfo['approval1'] = administration.approval1.username if administration.approval1 else "无"
+            cInfo['approval2'] = administration.approval2.username if administration.approval2 else "无"
+            cInfo['approval3'] = administration.approval3.username if administration.approval3 else "无"
+
+            cInfo['astate1'] = administration.astate1.__str__() if administration.astate1 else "无"
+            cInfo['astate2'] = administration.astate2.__str__() if administration.astate2 else "无"
+            cInfo['astate3'] = administration.astate3.__str__() if administration.astate3 else "无"
+
+            cInfo['atime1'] = administration.atime1.__str__() if administration.atime1 else "无"
+            cInfo['atime2'] = administration.atime2.__str__() if administration.atime2 else "无"
+            cInfo['atime3'] = administration.atime3.__str__() if administration.atime3 else "无"
+
+            cInfo['sign'] = administration.sign.username if administration.sign else "无"
+            cInfo['sinformation'] = administration.sinformation if administration.sinformation else "无"
+            cInfo['stime'] = administration.stime.__str__() if administration.stime else "无"
+
+            return JsonResponse({'cInfo':cInfo})
     else:
         return render(request, 'setContract.html')
 
