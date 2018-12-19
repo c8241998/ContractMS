@@ -4,7 +4,7 @@ html, body {
 }
 
 body {
-    background: url('../image/login_background.jpg') fixed;
+    background: url('../image/landing_background.jpg') fixed;
     background-size: cover;
 }
 
@@ -12,9 +12,4 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.logo {
-    background-color: rgba(255, 255, 255, 0.75);
-    border-radius: 50px;
 }

@@ -20,3 +20,5 @@
     width: 200px;
     min-height: 400px;
 }
+
+  html { overflow-x: hidden; overflow-y: auto; }

@@ -8,6 +8,7 @@ import time
 import json
 from django.http import FileResponse
 from django.http import JsonResponse
+from .mailSender import *
 
 # Create your views here.
 
@@ -34,6 +35,9 @@ def login(request):
             res = {'msg': 'fail', 'info': 'password is invalid.'}
             return HttpResponse(json.dumps(res))
         auth.login(request, re)
+
+        mail("shxy522@outlook.com","登陆成功!","合同管理系统","czd","登陆成功提示")
+
         res = {'msg': 'success'}
         return HttpResponse(json.dumps(res))
     return render(request, 'login.html');
