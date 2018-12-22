@@ -5,9 +5,18 @@
 <head>
     <meta charset="utf-8">
     <title>我管理的合同</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="{% static 'style/my.css' %}">
+
+    <link rel="stylesheet" href="{% static 'style/others.css' %}">
+    <link rel="stylesheet" href="{% static 'style/mdui.min.css' %}">
+    <link rel="stylesheet" href="{% static 'style/index.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bulma.min.css' %}">
+
+    <script defer src="{% static 'javascript/all.js' %}"></script>
+    <script src="{% static 'javascript/vue.js' %}"></script>
+    <script src="{% static 'javascript/index.js' %}"></script>
+    <script src="{% static 'javascript/jquery.min.js' %}"></script>
+    <script src="{% static 'javascript/mdui.min.js' %}"></script>
 </head>
 <body>
 <el-container id="table">
@@ -53,7 +62,7 @@
                         <el-input type="textarea" autosize placeholder=" manageContract.content"
                                   v-model="manageContract.content" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="附件">
+                    <el-form-item label="附件" :label-width="formLabelWidth">
                         <span v-if="manageContract.file=='true'">
                             <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
                         </span>
@@ -116,7 +125,7 @@
                         <el-input type="textarea" autosize placeholder=" manageContract.content"
                                   v-model="manageContract.content" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="附件">
+                    <el-form-item label="附件" :label-width="formLabelWidth">
                         <span v-if="manageContract.file=='true'">
                             <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
                         </span>
@@ -183,7 +192,7 @@
                         <el-input type="textarea" autosize placeholder=" manageContract.content"
                                   v-model="manageContract.content" :disabled="true"></el-input>
                     </el-form-item>
-                    <el-form-item label="附件">
+                    <el-form-item label="附件" :label-width="formLabelWidth">
                         <span v-if="manageContract.file=='true'">
                             <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
                         </span>
@@ -204,7 +213,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear_sign();">重 置</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
+            <el-button type="primary" @click="submitForm_sign">提 交</el-button>
         </div>
     </el-dialog>
     <el-dialog title="查看合同内容" :visible.sync="showContract">
@@ -339,10 +348,6 @@
 </el-container>
 </body>
 
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- 引入组件库 -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script>
     var vue = new Vue({
         delimiters: ['[[', ']]'],
@@ -388,68 +393,68 @@
                     clientname: 'bbb', //客户名
                     begintime: '111', //开始时间
                     endtime: '111', //结束时间
-                    content:'tergfgsdfg',
-                    file:'false',
+                    content: 'tergfgsdfg',
+                    file: 'false',
                     stateNum: '1', //状态编号
                     state: '会签中', //状态
                     myMissionNum: '1', //状态编号              1     3         4
                     myMission: '会签', //状态                       会签   审批      签订
                     myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
                     myMissionState: '可处理', //状态          待处理                          可处理    已处理
-                },{
+                }, {
                     contractnum: '002', //合同号
                     contractname: 'ccc', //合同名
                     draft: 'ddd',//起草人
                     clientname: 'aaa', //客户名
                     begintime: '111', //开始时间
                     endtime: '111', //结束时间
-                    content:'fdvxdxhzdng',
-                    file:'true',
+                    content: 'fdvxdxhzdng',
+                    file: 'true',
                     stateNum: '3', //状态编号
                     state: '审批中', //状态
                     myMissionNum: '3', //状态编号              1     3         4
                     myMission: '审批', //状态                       会签   审批      签订
                     myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
                     myMissionState: '可处理', //状态          待处理                          可处理    已处理
-                },{
+                }, {
                     contractnum: '003', //合同号
                     contractname: 'ccc', //合同名
                     draft: 'ddd',//起草人
                     clientname: 'aaa', //客户名
                     begintime: '111', //开始时间
                     endtime: '111', //结束时间
-                    content:'fdvxdxhzdng',
-                    file:'true',
+                    content: 'fdvxdxhzdng',
+                    file: 'true',
                     stateNum: '4', //状态编号
                     state: '签订中', //状态
                     myMissionNum: '4', //状态编号              1     3         4
                     myMission: '签订', //状态                       会签   审批      签订
                     myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
                     myMissionState: '可处理', //状态          待处理                          可处理    已处理
-                },{
+                }, {
                     contractnum: '002', //合同号
                     contractname: 'ccc', //合同名
                     draft: 'ddd',//起草人
                     clientname: 'aaa', //客户名
                     begintime: '111', //开始时间
                     endtime: '111', //结束时间
-                    content:'fdvxdxhzdng',
-                    file:'true',
+                    content: 'fdvxdxhzdng',
+                    file: 'true',
                     stateNum: '3', //状态编号
                     state: '审批中', //状态
                     myMissionNum: '1', //状态编号              1     3         4
                     myMission: '会签', //状态                       会签   审批      签订
                     myMissionStateNum: '1', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
                     myMissionState: '已处理', //状态          待处理                          可处理    已处理
-                },{
+                }, {
                     contractnum: '002', //合同号
                     contractname: 'ccc', //合同名
                     draft: 'ddd',//起草人
                     clientname: 'aaa', //客户名
                     begintime: '111', //开始时间
                     endtime: '111', //结束时间
-                    content:'fdvxdxhzdng',
-                    file:'true',
+                    content: 'fdvxdxhzdng',
+                    file: 'true',
                     stateNum: '1', //状态编号
                     state: '会签中', //状态
                     myMissionNum: '4', //状态编号              1     3         4
@@ -457,17 +462,17 @@
                     myMissionStateNum: '-1', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
                     myMissionState: '待处理', //状态          待处理                          可处理    已处理
                 }],
-                manageContract1:false,
-                form_countersign:{
-                    contractnum:'',
-                    copinion:'',
+                manageContract1: false,
+                form_countersign: {
+                    contractnum: '',
+                    copinion: '',
                 },
-                rule_countersign:{
+                rule_countersign: {
                     copinion: [{required: true, message: '请输入会签意见', trigger: 'blur'}],
                 },
-                manageContract3:false,
-                form_approval:{
-                    contractnum:'',
+                manageContract3: false,
+                form_approval: {
+                    contractnum: '',
                     astate: '2',
                     aopinion: '',
                 },
@@ -476,24 +481,26 @@
                 },
                 manageContract4: false,
                 form_sign: {
-                    contractnum:'',
-                    sinformation:'',
+                    contractnum: '',
+                    sinformation: '',
                 },
                 rule_sign: {
                     sinformation: [{required: true, message: '请输入签订信息', trigger: 'blur'}],
                 },
-                showContract:false,
-                manageContract:{
+                showContract: false,
+                manageContract: {
                     contractnum: '', //合同号
                     contractname: '', //合同名
                     draft: '',//起草人
                     clientname: '', //客户名
                     begintime: '', //开始时间
                     endtime: '', //结束时间
-                    content:'',
-                    file:'',
+                    content: '',
+                    file: '',
                 },
-                fd:'',
+                fd: '',
+                formLabelWidth: '100px',
+                activeName: '0',
             }
         },
         methods: {
@@ -545,19 +552,19 @@
                 form.submit()
             },
             showManageContract1(row) {
-                this.manageContract=row;
-                this.form_countersign.contractnum=row.contractnum;
+                this.manageContract = row;
+                this.form_countersign.contractnum = row.contractnum;
                 this.manageContract1 = true;
             },
             showManageContract3(row) {
-                this.manageContract=row;
-                this.form_approval.contractnum=row.contractnum;
+                this.manageContract = row;
+                this.form_approval.contractnum = row.contractnum;
                 this.manageContract3 = true;
             },
             showManageContract4(row) {
-                this.manageContract=row;
-                this.form_sign.contractnum=row.contractnum;
-                this.manageContract4=true;
+                this.manageContract = row;
+                this.form_sign.contractnum = row.contractnum;
+                this.manageContract4 = true;
             },
             submitForm_countersign() {
                 this.$refs['form_countersign'].validate((valid) => {
@@ -660,23 +667,23 @@
                 });
             },
             clear_countersign() {
-                 if (confirm("确定清空会签意见吗？"))
-                     this.form_countersign.copinion = '';
-                 else return false;
+                if (confirm("确定清空会签意见吗？"))
+                    this.form_countersign.copinion = '';
+                else return false;
             },
             clear_approval() {
-                 if (confirm("确定清空审批意见吗？"))
-                     this.form_approval.aopinion = '';
-                 else return false;
+                if (confirm("确定清空审批意见吗？"))
+                    this.form_approval.aopinion = '';
+                else return false;
             },
             clear_sign() {
-                 if (confirm("确定清空签订信息吗？"))
-                     this.form_sign.sinformation = '';
-                 else return false;
+                if (confirm("确定清空签订信息吗？"))
+                    this.form_sign.sinformation = '';
+                else return false;
             },
-            showContractOpen(row){
-                this.manageContract=row;
-                this.showContract=true;
+            showContractOpen(row) {
+                this.manageContract = row;
+                this.showContract = true;
             }
         }
     })
