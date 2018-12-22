@@ -5,9 +5,18 @@
 <head>
     <meta charset="utf-8">
     <title>我起草的合同</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="{% static 'style/my.css' %}">
+
+    <link rel="stylesheet" href="{% static 'style/others.css' %}">
+    <link rel="stylesheet" href="{% static 'style/mdui.min.css' %}">
+    <link rel="stylesheet" href="{% static 'style/index.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bulma.min.css' %}">
+
+    <script defer src="{% static 'javascript/all.js' %}"></script>
+    <script src="{% static 'javascript/vue.js' %}"></script>
+    <script src="{% static 'javascript/index.js' %}"></script>
+    <script src="{% static 'javascript/jquery.min.js' %}"></script>
+    <script src="{% static 'javascript/mdui.min.js' %}"></script>
 </head>
 
 <body>
@@ -58,8 +67,85 @@
             <el-button type="primary" @click="submitForm">提 交</el-button>
         </div>
     </el-dialog>
+    <el-dialog title="合同分配信息" :visible.sync="showContractInfo">
+        <el-collapse v-model="activeName" accordion>
+            <el-collapse-item title="会签" name="1">
+                <el-table :data="contractInfo.countersign">
+                    <el-table-column prop="countersignPerson" label="会签人" width="150"></el-table-column>
+                    <el-table-column prop="opinion" label="会签意见"></el-table-column>
+                    <el-table-column prop="ctime" label="会签时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+            <el-collapse-item title="审批" name="2">
+                <el-table :data="contractInfo.approval">
+                    <el-table-column prop="approvalPerson" label="审批人" width="150"></el-table-column>
+                    <el-table-column prop="astate" label="审批结果"></el-table-column>
+                    <el-table-column prop="atime" label="审批时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+            <el-collapse-item title="签订" name="3">
+                <el-table :data="contractInfo.sign">
+                    <el-table-column prop="signPerson" label="签订人" width="150"></el-table-column>
+                    <el-table-column prop="sinformation" label="签订信息"></el-table-column>
+                    <el-table-column prop="stime" label="签订时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+        </el-collapse>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showContractInfo = false">我知道啦</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="定稿" :visible.sync="showFinalizeContract">
+        <el-form :model="form" ref="form" :rules="rules">
+            <el-form-item label="合同名称" :label-width="formLabelWidth" prop="contractname">
+                <el-input v-model="form.contractname" autocomplete="on"></el-input>
+            </el-form-item>
+            <el-form-item label="客户名" :label-width="formLabelWidth" prop="clientname">
+                <el-select v-model="form.clientname" placeholder="form.clientname">
+                    {% for client in clients %}
+                        <el-option label="{{ client }}" value={{ client }}></el-option>
+                    {% endfor %}
+                </el-select>
+            </el-form-item>
+            <el-form-item label="生效时间" :label-width="formLabelWidth" prop="begintime">
+                <el-col :span="11">
+                    <el-date-picker type="date" placeholder="form.begintime" v-model="form.begintime" value-format="yyyy-MM-dd"
+                                    style="width: 100%;"></el-date-picker>
+                </el-col>
+            </el-form-item>
+            <el-form-item label="失效时间" :label-width="formLabelWidth" prop="endtime">
+                <el-col :span="11">
+                    <el-date-picker type="date" placeholder="form.endtime" v-model="form.endtime" value-format="yyyy-MM-dd"
+                                    style="width: 100%;"></el-date-picker>
+                </el-col>
+            </el-form-item>
+            <el-form-item label="合同内容" :label-width="formLabelWidth" prop="content">
+                <el-input type="textarea" autosize placeholder="form.content" v-model="form.content">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="附件" :label-width="formLabelWidth">
+                <el-upload
+                        class="upload-demo"
+                        ref="upload"
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        :auto-upload="false"
+                        :before-upload="beforeUpload"
+                        limit="1">
+                    <el-button v-if="form.file=='true'" slot="trigger" size="small" type="primary">更换文件</el-button>
+                    <el-button v-if="form.file=='false'" slot="trigger" size="small" type="primary">上传文件</el-button>
+                </el-upload>
+            </el-form-item>
+            <el-form-item label="已上传附件" :label-width="formLabelWidth">
+                <el-button size="small" type="primary" @click="download(c.row.contractnum)">下载</el-button>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear();">重 置</el-button>
+            <el-button type="primary" @click="submitForm">提 交</el-button>
+        </div>
+    </el-dialog>
     <el-header style="text-align: right; font-size: 12px">
-        <el-button icon="el-icon-edit" @click="showNewcontract=true;">起草</el-button>
+        <el-button icon="el-icon-edit" @click="newContractOpen">起草</el-button>
     </el-header>
     <el-table :data="tableData" style="width: 100%">
         <el-table-column type="expand">
@@ -92,16 +178,16 @@
                     </el-form-item>
                     <el-form-item label="会签信息"
                                   v-show="c.row.stateNum==1||c.row.stateNum==2||c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
-                        <button>查看</button>
+                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'1')"></el-button>
                     </el-form-item>
                     <el-form-item label="前去定稿" v-show="c.row.stateNum==2">
-                        <button>编辑</button>
+                        <el-button type="primary" icon="el-icon-edit" circle @click="finalizeContract(c.row)"></el-button>
                     </el-form-item>
                     <el-form-item label="审批信息" v-show="c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
-                        <button>查看</button>
+                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'2')"></el-button>
                     </el-form-item>
                     <el-form-item label="签订信息" v-show="c.row.stateNum==5">
-                        <button>查看</button>
+                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'3')"></el-button>
                     </el-form-item>
 
                 </el-form>
@@ -118,11 +204,7 @@
 
 </el-container>
 </body>
-<!-- import Vue before Element -->
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- 引入组件库 -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+
 <script>
     var vue = new Vue({
         delimiters: ['[[', ']]'],
@@ -184,6 +266,16 @@
                 }
             };
             return {
+                showContractInfo:false,
+                activeName:'1',
+                contractInfo:[
+                ],
+                showFinalizeContract:false,
+                finalize:{
+                    contractname: '', //合同名
+                    content: '',
+                    file: ''
+                },
                 showNewcontract: false,
                 fd: '',   // formdata  提交表单前存储所有表单内数据 用于发送
                 form: {
@@ -209,12 +301,31 @@
                         {validator:validateContent, trigger: 'blur'}
                     ]
                 },
+                tableData: [{
+                    contractnum: '001', //合同号
+                    contractname: '张杰', //合同名
+                    clientname: 'xiena', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    stateNum: '2', //状态编号
+                    state: '待定稿',//状态
+                    draft: '',//起草人
+                    content: 'fefdcadscwe', //合同内容
+                    file: 'true' //文件是否存在
+                }],
                 formLabelWidth: '100px',
-
-                tableData: []
             };
         },
         methods: {
+            newContractOpen() {
+                this.form.contractname = ''; //合同名
+                this.form.clientname = ''; //客户名
+                this.form.begintime = ''; //开始时间
+                this.form.endtime = ''; //结束时间
+                this.form.content = '';
+                this.form.file = '';
+                this.showNewcontract = true;
+            },
             submitForm() {
                 this.$refs['form'].validate((valid) => {
                     if (valid) {
@@ -241,7 +352,6 @@
                                         type: 'success'
                                     });
                                     vue.showNewcontract = false;
-                                    window.location.href="";
                                 }
                                 else if (msg["msg"] == "fail") {
                                     vue.$message.error('起草失败！');
@@ -257,12 +367,17 @@
                 this.form.file = file;
             },
             clear() {
-                this.form.contractname = ''; //合同名
-                this.form.clientname = ''; //客户名
-                this.form.begintime = ''; //开始时间
-                this.form.endtime = ''; //结束时间
-                this.form.content = '';
-                this.form.file = '';
+                 if (confirm("确定清空此合同所有内容吗？")) {
+                     this.form.contractname = ''; //合同名
+                     this.form.clientname = ''; //客户名
+                     this.form.begintime = ''; //开始时间
+                     this.form.endtime = ''; //结束时间
+                     this.form.content = '';
+                     this.form.file = '';
+                 }
+                 else{
+                     return false;
+                 }
             },
             download(contractnum) {
                 var form = $("<form>");//定义一个form表单
@@ -277,6 +392,62 @@
                 form.append(sql);
                 $(document.body).append(form)
                 form.submit()
+            },
+            showContractInfoOpen(row,activeName) {
+                this.activeName=activeName;
+                this.showContractInfo = true;
+                $.ajax({
+                    url: "/getContractInfo",
+                    type: "POST",
+                    success: function (data1) {
+                        var cInfo = JSON.parse(data1).cInfo;
+                        vue.contractInfo.push(
+                            {
+                                contractnum: row.contractnum,
+                                countersign: [{
+                                    countersignPerson: cInfo.countersign1,
+                                    opinion: cInfo.opinion1,
+                                    ctime: cInfo.ctime1,
+                                }, {
+                                    countersignPerson: cInfo.countersign2,
+                                    opinion: cInfo.opinion2,
+                                    ctime: cInfo.ctime2,
+                                }, {
+                                    countersignPerson: cInfo.countersign3,
+                                    opinion: cInfo.opinion3,
+                                    ctime: cInfo.ctime3,
+                                }],
+                                approval: [{
+                                    approvalPerson: cInfo.approval1,
+                                    astate: cInfo.astate1,
+                                    atime: cInfo.atime1,
+                                }, {
+                                    approvalPerson: cInfo.approval2,
+                                    astate: cInfo.astate2,
+                                    atime: cInfo.atime2,
+                                }, {
+                                    approvalPerson: cInfo.approval3,
+                                    astate: cInfo.astate3,
+                                    atime: cInfo.atime3,
+                                }],
+                                sign: [{
+                                    signPerson: cInfo.sign,
+                                    sinformation: cInfo.sinformation,
+                                    stime: cInfo.stime,
+                                }],
+                            }
+                        );
+                    }
+                })
+            },
+            finalizeContract(row){
+                this.showFinalizeContract=true;
+                this.form.contractname = row.contractname; //合同名
+                this.form.clientname = row.clientname; //客户名
+                this.form.begintime = row.begintime; //开始时间
+                this.form.endtime = row.endtime; //结束时间
+                this.form.content = row.content;
+                this.form.file = row.file;
             }
         }
     })
