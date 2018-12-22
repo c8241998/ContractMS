@@ -79,6 +79,7 @@
             <el-collapse-item title="审批" name="2">
                 <el-table :data="contractInfo.approval">
                     <el-table-column prop="approvalPerson" label="审批人" width="150"></el-table-column>
+                    <el-table-column prop="opinion" label="审批意见"></el-table-column>
                     <el-table-column prop="astate" label="审批结果"></el-table-column>
                     <el-table-column prop="atime" label="审批时间" width="150"></el-table-column>
                 </el-table>
@@ -109,19 +110,27 @@
             </el-form-item>
             <el-form-item label="生效时间" :label-width="formLabelWidth" prop="begintime">
                 <el-col :span="11">
-                    <el-date-picker type="date" placeholder="form.begintime" v-model="form.begintime" value-format="yyyy-MM-dd"
+                    <el-date-picker type="date" placeholder="form.begintime" v-model="form.begintime"
+                                    value-format="yyyy-MM-dd"
                                     style="width: 100%;"></el-date-picker>
                 </el-col>
             </el-form-item>
             <el-form-item label="失效时间" :label-width="formLabelWidth" prop="endtime">
                 <el-col :span="11">
-                    <el-date-picker type="date" placeholder="form.endtime" v-model="form.endtime" value-format="yyyy-MM-dd"
+                    <el-date-picker type="date" placeholder="form.endtime" v-model="form.endtime"
+                                    value-format="yyyy-MM-dd"
                                     style="width: 100%;"></el-date-picker>
                 </el-col>
             </el-form-item>
             <el-form-item label="合同内容" :label-width="formLabelWidth" prop="content">
                 <el-input type="textarea" autosize placeholder="form.content" v-model="form.content">
                 </el-input>
+            </el-form-item>
+            <el-form-item label="已上传附件" :label-width="formLabelWidth">
+                <el-button size="small" v-if="form.file=='true'" type="text" @click="download(form.contractnum)">
+                    下载
+                </el-button>
+                <p v-else>无</p>
             </el-form-item>
             <el-form-item label="附件" :label-width="formLabelWidth">
                 <el-upload
@@ -131,13 +140,11 @@
                         :auto-upload="false"
                         :before-upload="beforeUpload"
                         limit="1">
-                    <el-button v-if="form.file=='true'" slot="trigger" size="small" type="primary">更换文件</el-button>
-                    <el-button v-if="form.file=='false'" slot="trigger" size="small" type="primary">上传文件</el-button>
+                    <el-button v-if="form.file=='true'" slot="trigger" size="small" type="text">更换文件</el-button>
+                    <el-button v-if="form.file=='false'" slot="trigger" size="small" type="text">上传文件</el-button>
                 </el-upload>
             </el-form-item>
-            <el-form-item label="已上传附件" :label-width="formLabelWidth">
-                <el-button size="small" type="primary" @click="download(c.row.contractnum)">下载</el-button>
-            </el-form-item>
+
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear();">重 置</el-button>
@@ -181,12 +188,13 @@
                         <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'1')"></el-button>
                     </el-form-item>
                     <el-form-item label="前去定稿" v-show="c.row.stateNum==2">
-                        <el-button type="primary" icon="el-icon-edit" circle @click="finalizeContract(c.row)"></el-button>
+                        <el-button type="primary" icon="el-icon-edit" circle
+                                   @click="finalizeContract(c.row)"></el-button>
                     </el-form-item>
                     <el-form-item label="审批信息" v-show="c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
                         <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'2')"></el-button>
                     </el-form-item>
-                    <el-form-item label="签订信息" v-show="c.row.stateNum==5">
+                    <el-form-item label="签订信息" v-show="c.row.stateNum==4||c.row.stateNum==5">
                         <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'3')"></el-button>
                     </el-form-item>
 
@@ -214,6 +222,7 @@
             $.ajax({
                 url: "/myContract",
                 type: "POST",
+                data: {"type": "init"},
                 success: function (data1) {
                     var contracts = JSON.parse(data1).contracts;
                     for (var i = 0; i < contracts.length; i++) {
@@ -238,15 +247,15 @@
             })
         },
         data() {
-            var validateBegintime= (rule, value, callback) => {
-                if (value > vue.form.endtime && vue.form.endtime!='') {
+            var validateBegintime = (rule, value, callback) => {
+                if (value > vue.form.endtime && vue.form.endtime != '') {
                     callback(new Error('请选择合理的生效时间'));
                 }
                 else {
                     callback();
                 }
             };
-            var validateEndtime= (rule, value, callback) => {
+            var validateEndtime = (rule, value, callback) => {
                 if (value < vue.form.begintime) {
                     callback(new Error('请选择合理的失效时间'));
                 }
@@ -254,11 +263,11 @@
                     callback();
                 }
             };
-            var validateContent= (rule, value, callback) => {
+            var validateContent = (rule, value, callback) => {
                 if (value === '') {
                     callback(new Error('请输入合同内容'));
                 }
-                else if(value.length >= 200){
+                else if (value.length >= 200) {
                     callback(new Error('长度不得超过200，建议您使用附件上传'));
                 }
                 else {
@@ -266,12 +275,11 @@
                 }
             };
             return {
-                showContractInfo:false,
-                activeName:'1',
-                contractInfo:[
-                ],
-                showFinalizeContract:false,
-                finalize:{
+                showContractInfo: false,
+                activeName: '1',
+                contractInfo: [],
+                showFinalizeContract: false,
+                finalize: {
                     contractname: '', //合同名
                     content: '',
                     file: ''
@@ -291,28 +299,17 @@
                     clientname: [{required: true, message: '请选择客户姓名', trigger: 'blur'}], //客户名
                     begintime: [
                         {required: true, message: '请选择合同生效时间', trigger: 'blur'},
-                        {validator:validateBegintime,  trigger: 'blur'}
+                        {validator: validateBegintime, trigger: 'blur'}
                     ], //开始时间
                     endtime: [
                         {required: true, message: '请选择合同失效时间', trigger: 'blur'},
-                        {validator:validateEndtime,  trigger: 'blur'}
+                        {validator: validateEndtime, trigger: 'blur'}
                     ], //结束时间
                     content: [
-                        {validator:validateContent, trigger: 'blur'}
+                        {validator: validateContent, trigger: 'blur'}
                     ]
                 },
-                tableData: [{
-                    contractnum: '001', //合同号
-                    contractname: '张杰', //合同名
-                    clientname: 'xiena', //客户名
-                    begintime: '111', //开始时间
-                    endtime: '111', //结束时间
-                    stateNum: '2', //状态编号
-                    state: '待定稿',//状态
-                    draft: '',//起草人
-                    content: 'fefdcadscwe', //合同内容
-                    file: 'true' //文件是否存在
-                }],
+                tableData: [],
                 formLabelWidth: '100px',
             };
         },
@@ -331,6 +328,8 @@
                     if (valid) {
                         this.$refs.upload.submit();
                         vue.fd = new FormData();
+                        vue.fd.append("type","finalize");
+                        vue.fd.append("contractnum", this.form.contractnum);
                         vue.fd.append("contractname", this.form.contractname);
                         vue.fd.append("clientname", this.form.clientname);
                         vue.fd.append("begintime", this.form.begintime);
@@ -338,24 +337,14 @@
                         vue.fd.append("content", this.form.content);
                         vue.fd.append("file", this.form.file);
                         $.ajax({
-                            url: "/newContract",
+                            url: "/myContract",
                             type: "POST",
                             processData: false,
                             contentType: false,
-                            data: vue.fd
-                            ,
+                            data: vue.fd,
                             success: function (data1) {
-                                var msg = JSON.parse(data1);
-                                if (msg["msg"] == "success") {
-                                    vue.$message({
-                                        message: '成功起草合同!',
-                                        type: 'success'
-                                    });
-                                    vue.showNewcontract = false;
-                                }
-                                else if (msg["msg"] == "fail") {
-                                    vue.$message.error('起草失败！');
-                                }
+                                vue.$message.success('定稿成功！');
+                                window.location.href="";
                             }
                         })
                     } else {
@@ -364,20 +353,20 @@
                 });
             },
             beforeUpload(file) {
-                this.form.file = file;
+                    this.form.file = file;
             },
             clear() {
-                 if (confirm("确定清空此合同所有内容吗？")) {
-                     this.form.contractname = ''; //合同名
-                     this.form.clientname = ''; //客户名
-                     this.form.begintime = ''; //开始时间
-                     this.form.endtime = ''; //结束时间
-                     this.form.content = '';
-                     this.form.file = '';
-                 }
-                 else{
-                     return false;
-                 }
+                if (confirm("确定清空此合同所有内容吗？")) {
+                    this.form.contractname = ''; //合同名
+                    this.form.clientname = ''; //客户名
+                    this.form.begintime = ''; //开始时间
+                    this.form.endtime = ''; //结束时间
+                    this.form.content = '';
+                    this.form.file = '';
+                }
+                else {
+                    return false;
+                }
             },
             download(contractnum) {
                 var form = $("<form>");//定义一个form表单
@@ -393,41 +382,47 @@
                 $(document.body).append(form)
                 form.submit()
             },
-            showContractInfoOpen(row,activeName) {
-                this.activeName=activeName;
+            showContractInfoOpen(row, activeName) {
+                this.activeName = activeName;
                 this.showContractInfo = true;
                 $.ajax({
-                    url: "/getContractInfo",
+                    url: "/myContract",
                     type: "POST",
+                    data: {"type": "info", "contractnum": row.contractnum},
                     success: function (data1) {
-                        var cInfo = JSON.parse(data1).cInfo;
-                        vue.contractInfo.push(
+                        var cInfo = data1.cInfo;
+                        vue.contractInfo =
                             {
-                                contractnum: row.contractnum,
-                                countersign: [{
-                                    countersignPerson: cInfo.countersign1,
-                                    opinion: cInfo.opinion1,
-                                    ctime: cInfo.ctime1,
-                                }, {
-                                    countersignPerson: cInfo.countersign2,
-                                    opinion: cInfo.opinion2,
-                                    ctime: cInfo.ctime2,
-                                }, {
-                                    countersignPerson: cInfo.countersign3,
-                                    opinion: cInfo.opinion3,
-                                    ctime: cInfo.ctime3,
-                                }],
+                                contractnum: cInfo.contractnum,
+                                countersign: [
+                                    {
+                                        countersignPerson: cInfo.countersign1,
+                                        opinion: cInfo.copinion1,
+                                        ctime: cInfo.ctime1,
+                                    }, {
+                                        countersignPerson: cInfo.countersign2,
+                                        opinion: cInfo.copinion2,
+                                        ctime: cInfo.ctime2,
+                                    }, {
+                                        countersignPerson: cInfo.countersign3,
+                                        opinion: cInfo.copinion3,
+                                        ctime: cInfo.ctime3,
+                                    }
+                                ],
                                 approval: [{
                                     approvalPerson: cInfo.approval1,
                                     astate: cInfo.astate1,
+                                    opinion: cInfo.aopinion1,
                                     atime: cInfo.atime1,
                                 }, {
                                     approvalPerson: cInfo.approval2,
                                     astate: cInfo.astate2,
+                                    opinion: cInfo.aopinion2,
                                     atime: cInfo.atime2,
                                 }, {
                                     approvalPerson: cInfo.approval3,
                                     astate: cInfo.astate3,
+                                    opinion: cInfo.aopinion3,
                                     atime: cInfo.atime3,
                                 }],
                                 sign: [{
@@ -436,12 +431,13 @@
                                     stime: cInfo.stime,
                                 }],
                             }
-                        );
+                        {#);#}
                     }
                 })
             },
-            finalizeContract(row){
-                this.showFinalizeContract=true;
+            finalizeContract(row) {
+                this.showFinalizeContract = true;
+                this.form.contractnum = row.contractnum;
                 this.form.contractname = row.contractname; //合同名
                 this.form.clientname = row.clientname; //客户名
                 this.form.begintime = row.begintime; //开始时间

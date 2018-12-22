@@ -28,6 +28,7 @@
         </el-table>
         <el-table :data="contractInfo.approval">
             <el-table-column prop="approvalPerson" label="审批人" width="150"></el-table-column>
+            <el-table-column prop="opinion" label="审批意见"></el-table-column>
             <el-table-column prop="astate" label="审批结果"></el-table-column>
             <el-table-column prop="atime" label="审批时间" width="150"></el-table-column>
         </el-table>
@@ -196,6 +197,9 @@
             setContractOpen(row) {
                 this.showSetContract = true;
                 this.setContract.contractnum = row.contractnum;
+                this.usernames1 = [];
+                this.usernames2 = [];
+                this.usernames3 = [];
                 this.usernames.forEach((username, index) => {
                     this.usernames1.push({
                         label: username,
@@ -303,29 +307,32 @@
                                 countersign: [
                                     {
                                     countersignPerson: cInfo.countersign1,
-                                    opinion: cInfo.option1,
+                                    opinion: cInfo.copinion1,
                                     ctime: cInfo.ctime1,
                                 }, {
                                     countersignPerson: cInfo.countersign2,
-                                    opinion: cInfo.option2,
+                                    opinion: cInfo.copinion2,
                                     ctime: cInfo.ctime2,
                                 }, {
                                     countersignPerson: cInfo.countersign3,
-                                    opinion: cInfo.option3,
+                                    opinion: cInfo.copinion3,
                                     ctime: cInfo.ctime3,
                                 }
                                 ],
                                 approval: [{
                                     approvalPerson: cInfo.approval1,
                                     astate: cInfo.astate1,
+                                    opinion: cInfo.aopinion1,
                                     atime: cInfo.atime1,
                                 }, {
                                     approvalPerson: cInfo.approval2,
                                     astate: cInfo.astate2,
+                                    opinion: cInfo.aopinion2,
                                     atime: cInfo.atime2,
                                 }, {
                                     approvalPerson: cInfo.approval3,
                                     astate: cInfo.astate3,
+                                    opinion: cInfo.aopinion3,
                                     atime: cInfo.atime3,
                                 }],
                                 sign: [{
@@ -334,7 +341,6 @@
                                     stime: cInfo.stime,
                                 }],
                             }
-                        {#);#}
                     }
                 })
             },
