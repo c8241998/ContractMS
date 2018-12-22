@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cbe24303-e454-4d94-a327-539c3c9f2e70" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/account_app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/account_app/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account_app/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/account_app/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/myContract.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/myContract.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/setContract.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/setContract.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -58,7 +56,7 @@
         <counts>
           <entry key="Django Console" value="31" />
           <entry key="css" value="14" />
-          <entry key="html" value="4702" />
+          <entry key="html" value="4710" />
           <entry key="py" value="7361" />
           <entry key="txt" value="20" />
         </counts>
@@ -66,7 +64,7 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="CSS" value="14" />
-          <entry key="HTML" value="4702" />
+          <entry key="HTML" value="4710" />
           <entry key="PLAIN_TEXT" value="20" />
           <entry key="Python" value="7392" />
         </counts>
@@ -96,15 +94,16 @@
         <entry file="file://$PROJECT_DIR$/templates/myContract.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="245">
-              <caret line="196" column="91" selection-start-line="196" selection-start-column="91" selection-end-line="196" selection-end-column="91" />
+              <caret line="58" column="25" selection-start-line="58" selection-start-column="25" selection-end-line="58" selection-end-column="25" />
               <folding>
-                <element signature="n#el-dialog#0;n#el-container#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="n#el-dialog#1;n#el-container#0;n#body#0;n#html#0;n#!!top" />
+                <element signature="n#style#0;n#el-date-picker#0;n#el-col#0;n#el-form-item#2;n#el-form#0;n#el-dialog#2;n#el-container#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-date-picker#0;n#el-col#0;n#el-form-item#3;n#el-form#0;n#el-dialog#2;n#el-container#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#el-table#0;n#el-container#0;n#body#0;n#html#0;n#!!top" />
                 <element signature="e#12383#12616#0#HTML" />
                 <element signature="e#12678#12889#0#HTML" />
                 <element signature="e#12951#13273#0#HTML" />
                 <element signature="e#18698#20963#0#HTML" />
-                <element signature="e#20998#21395#0#HTML" />
               </folding>
             </state>
           </provider>
@@ -161,7 +160,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/myManageContract.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
+            <state relative-caret-position="60">
               <caret line="12" column="69" selection-start-line="12" selection-start-column="69" selection-end-line="12" selection-end-column="69" />
             </state>
           </provider>
@@ -197,8 +196,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>setContract_</find>
-      <find>prop=</find>
       <find>prop</find>
       <find>model</find>
       <find>setContract</find>
@@ -219,7 +216,6 @@
       <find>showContractInfoOpen</find>
       <find>showContractInfo</find>
       <find>creatye</find>
-      <find>finalizeContract</find>
       <find>data</find>
       <find>submitForm</find>
       <find>option</find>
@@ -227,6 +223,9 @@
       <find>beforeUpload</find>
       <find>download</find>
       <find>签订信息</find>
+      <find>定稿</find>
+      <find>finalizeContract</find>
+      <find>upload</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -624,13 +623,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/myManageContract.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="69" selection-start-line="12" selection-start-column="69" selection-end-line="12" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/allClient.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="269">
@@ -677,18 +669,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/templates/myManageContract.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="12" column="69" selection-start-line="12" selection-start-column="69" selection-end-line="12" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/templates/myContract.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="245">
-          <caret line="196" column="91" selection-start-line="196" selection-start-column="91" selection-end-line="196" selection-end-column="91" />
+          <caret line="58" column="25" selection-start-line="58" selection-start-column="25" selection-end-line="58" selection-end-column="25" />
           <folding>
-            <element signature="n#el-dialog#0;n#el-container#0;n#body#0;n#html#0;n#!!top" />
             <element signature="n#el-dialog#1;n#el-container#0;n#body#0;n#html#0;n#!!top" />
+            <element signature="n#style#0;n#el-date-picker#0;n#el-col#0;n#el-form-item#2;n#el-form#0;n#el-dialog#2;n#el-container#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-date-picker#0;n#el-col#0;n#el-form-item#3;n#el-form#0;n#el-dialog#2;n#el-container#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#el-table#0;n#el-container#0;n#body#0;n#html#0;n#!!top" />
             <element signature="e#12383#12616#0#HTML" />
             <element signature="e#12678#12889#0#HTML" />
             <element signature="e#12951#13273#0#HTML" />
             <element signature="e#18698#20963#0#HTML" />
-            <element signature="e#20998#21395#0#HTML" />
           </folding>
         </state>
       </provider>

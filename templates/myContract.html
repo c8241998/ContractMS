@@ -56,7 +56,7 @@
                         action="https://jsonplaceholder.typicode.com/posts/"
                         :auto-upload="false"
                         :before-upload="beforeUpload"
-                        limit="1"
+                        :limit="1"
                 >
                     <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
                 </el-upload>
@@ -139,7 +139,7 @@
                         action="https://jsonplaceholder.typicode.com/posts/"
                         :auto-upload="false"
                         :before-upload="beforeUpload"
-                        limit="1">
+                        :limit="1">
                     <el-button v-if="form.file=='true'" slot="trigger" size="small" type="text">更换文件</el-button>
                     <el-button v-if="form.file=='false'" slot="trigger" size="small" type="text">上传文件</el-button>
                 </el-upload>
