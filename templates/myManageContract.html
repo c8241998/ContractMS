@@ -5,22 +5,680 @@
 <head>
     <meta charset="utf-8">
     <title>我管理的合同</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="{% static 'style/my.css' %}">
-
-    <link rel="stylesheet" href="{% static 'style/others.css' %}">
-    <link rel="stylesheet" href="{% static 'style/mdui.min.css' %}">
-    <link rel="stylesheet" href="{% static 'style/index.css' %}">
-    <link rel="stylesheet" href="{% static 'style/bulma.min.css' %}">
-
-    <script defer src="{% static 'javascript/all.js' %}"></script>
-    <script src="{% static 'javascript/vue.js' %}"></script>
-    <script src="{% static 'javascript/index.js' %}"></script>
-    <script src="{% static 'javascript/jquery.min.js' %}"></script>
-    <script src="{% static 'javascript/mdui.min.js' %}"></script>
 </head>
 <body>
 <el-container id="table">
-    我管理的合同
+    <el-dialog title="会签" :visible.sync="manageContract1">
+        <el-collapse v-model="activeName" accordion>
+            <el-collapse-item title="合同" name="0">
+                <el-form>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="合同号" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractnum ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="18">
+                            <el-form-item label="合同名称" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="起草人" :label-width="formLabelWidth">
+                                <span>[[ manageContract.draft ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="客户名" :label-width="formLabelWidth">
+                                <span>[[ manageContract.clientname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="开始时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.begintime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="结束时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.endtime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-form-item label="合同内容" :label-width="formLabelWidth">
+                        <el-input type="textarea" autosize placeholder=" manageContract.content"
+                                  v-model="manageContract.content" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="附件">
+                        <span v-if="manageContract.file=='true'">
+                            <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
+                        </span>
+                        <span v-else>
+                            无
+                        </span>
+                    </el-form-item>
+                </el-form>
+            </el-collapse-item>
+        </el-collapse>
+        <el-form :model="form_countersign" ref="form_countersign" :rules="rule_countersign">
+            <el-form-item label="会签意见" :label-width="formLabelWidth" prop="copinion">
+                <el-input type="textarea" autosize v-model="form_countersign.copinion" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear_countersign();">重 置</el-button>
+            <el-button type="primary" @click="submitForm_countersign">提 交</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="审批" :visible.sync="manageContract3">
+        <el-collapse v-model="activeName" accordion>
+            <el-collapse-item title="合同" name="0">
+                <el-form>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="合同号" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractnum ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="18">
+                            <el-form-item label="合同名称" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="起草人" :label-width="formLabelWidth">
+                                <span>[[ manageContract.draft ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="客户名" :label-width="formLabelWidth">
+                                <span>[[ manageContract.clientname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="开始时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.begintime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="结束时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.endtime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-form-item label="合同内容" :label-width="formLabelWidth">
+                        <el-input type="textarea" autosize placeholder=" manageContract.content"
+                                  v-model="manageContract.content" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="附件">
+                        <span v-if="manageContract.file=='true'">
+                            <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
+                        </span>
+                        <span v-else>
+                            无
+                        </span>
+                    </el-form-item>
+                </el-form>
+            </el-collapse-item>
+        </el-collapse>
+        <el-form :model="form_approval" ref="form_approval" :rules="rule_approval">
+            <el-form-item label="审批结果" :label-width="formLabelWidth" prop="astate">
+                <el-radio v-model="form_approval.astate" label="2">通过</el-radio>
+                <el-radio v-model="form_approval.astate" label="1">拒绝</el-radio>
+            </el-form-item>
+            <el-form-item label="审批意见" :label-width="formLabelWidth" prop="aopinion">
+                <el-input v-model="form_approval.aopinion" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear_approval();">重 置</el-button>
+            <el-button type="primary" @click="submitForm_approval">提 交</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="签订" :visible.sync="manageContract4">
+        <el-collapse v-model="activeName" accordion>
+            <el-collapse-item title="合同" name="0">
+                <el-form>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="合同号" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractnum ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="18">
+                            <el-form-item label="合同名称" :label-width="formLabelWidth">
+                                <span>[[ manageContract.contractname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="起草人" :label-width="formLabelWidth">
+                                <span>[[ manageContract.draft ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="客户名" :label-width="formLabelWidth">
+                                <span>[[ manageContract.clientname ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="开始时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.begintime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="结束时间" :label-width="formLabelWidth">
+                                <span>[[ manageContract.endtime ]]</span>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-form-item label="合同内容" :label-width="formLabelWidth">
+                        <el-input type="textarea" autosize placeholder=" manageContract.content"
+                                  v-model="manageContract.content" :disabled="true"></el-input>
+                    </el-form-item>
+                    <el-form-item label="附件">
+                        <span v-if="manageContract.file=='true'">
+                            <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
+                        </span>
+                        <span v-else>
+                            无
+                        </span>
+                    </el-form-item>
+                </el-form>
+            </el-collapse-item>
+        </el-collapse>
+        <el-form :model="form_sign" ref="form_sign" :rules="rule_sign">
+            <el-form-item label="客户" :label-width="formLabelWidth">
+                <span>[[ manageContract.clientname ]]</span>
+            </el-form-item>
+            <el-form-item label="签订信息" :label-width="formLabelWidth" prop="cinformation">
+                <el-input type="textarea" autosize v-model="form_sign.cinformation" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear_sign();">重 置</el-button>
+            <el-button type="primary" @click="submitForm">提 交</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="查看合同内容" :visible.sync="showContract">
+        <el-form>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="合同号" :label-width="formLabelWidth">
+                        <span>[[ manageContract.contractnum ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="18">
+                    <el-form-item label="合同名称" :label-width="formLabelWidth">
+                        <span>[[ manageContract.contractname ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="起草人" :label-width="formLabelWidth">
+                        <span>[[ manageContract.draft ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="客户名" :label-width="formLabelWidth">
+                        <span>[[ manageContract.clientname ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="开始时间" :label-width="formLabelWidth">
+                        <span>[[ manageContract.begintime ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="结束时间" :label-width="formLabelWidth">
+                        <span>[[ manageContract.endtime ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-form-item label="合同内容" :label-width="formLabelWidth">
+                <el-input type="textarea" autosize placeholder=" manageContract.content"
+                          v-model="manageContract.content" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="附件">
+                        <span v-if="manageContract.file=='true'">
+                            <el-button type="text" @click="download(manageContract.contractnum)">下载</el-button>
+                        </span>
+                <span v-else>
+                            无
+                        </span>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showContract = false">我看完啦</el-button>
+        </div>
+    </el-dialog>
+    <el-header style="text-align: right; font-size: 12px">
+        <el-button @click="resetDateFilter">取消筛选</el-button>
+    </el-header>
+    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+        <el-table-column type="expand">
+            <div slot-scope="c">
+                <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="合同名称">
+                        <span>[[ c.row.contractname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="客户名">
+                        <span>[[ c.row.clientname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="起草人">
+                        <span>[[ c.row.draft ]]</span>
+                    </el-form-item>
+                    <el-form-item label="附件"
+                                  v-show="c.row.stateNum!='2'">
+                        <span v-if="c.row.file=='true'">
+                            <el-button type="text" @click="download(c.row.contractnum)">下载</el-button>
+                        </span>
+                        <span v-else>
+                            无
+                        </span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-table-column>
+        <el-table-column prop="contractnum" label="合同号" sortable></el-table-column>
+        <el-table-column prop="contractname" label="合同名"></el-table-column>
+        <el-table-column prop="draft" label="起草人"></el-table-column>
+        <el-table-column prop="clientname" label="客户名"></el-table-column>
+        <el-table-column prop="begintime" label="开始时间" sortable></el-table-column>
+        <el-table-column prop="endtime" label="结束时间" sortable></el-table-column>
+        <el-table-column prop="state" label="合同状态" sortable column-key="stateNum"
+                         :filters="[{ text: '会签中', value: ['1'] }, { text: '定稿中', value: ['2'] }, { text: '审批中', value: ['3'] }, { text: '签订中', value: ['4'] }, { text: '签订完成', value: ['5'] } ]"
+                         :filter-method="filterTag_stateNum"
+                         filter-placement="bottom-end">
+        </el-table-column>
+        <el-table-column prop="myMission" label="我的任务" sortable column-key="myMissionNum"
+                         :filters="[{ text: '会签', value: ['1'] }, { text: '审批', value: ['3'] },{ text: '签订', value: ['4'] }]"
+                         :filter-method="filterTag_missionNum"
+                         filter-placement="bottom-end">
+        </el-table-column>
+        <el-table-column prop="myMissionState" label="任务状态" sortable column-key="myMissionStateNum"
+                         :filters="[{ text: '待处理', value: ['-1'] }, { text: '可处理', value: ['0'] },{ text: '已处理', value: ['1'] }]"
+                         :filter-method="filterTag_missionStateNum"
+                         filter-placement="bottom-end">
+            <div slot-scope="scope">
+                <el-tag
+                        :type="scope.row.myMissionStateNum === '0' ? 'primary' : 'success'"
+                        disable-transitions>[[ scope.row.myMissionState ]]
+                </el-tag>
+            </div>
+        </el-table-column>
+        <el-table-column>
+            <div slot-scope="scope">
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           v-show="scope.row.myMissionStateNum=='0' && scope.row.myMissionNum=='1'"
+                           @click="showManageContract1(scope.row)">前去会签
+                </el-button>
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           v-show="scope.row.myMissionStateNum=='0' && scope.row.myMissionNum=='3'"
+                           @click="showManageContract3(scope.row)">前去审批
+                </el-button>
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           v-show="scope.row.myMissionStateNum=='0' && scope.row.myMissionNum=='4'"
+                           @click="showManageContract4(scope.row)">前去签订
+                </el-button>
+                <el-button size="mini" type="success" style="margin-left: 0px;"
+                           v-show="scope.row.myMissionStateNum=='-1'||scope.row.myMissionStateNum=='1'"
+                           @click="showContractOpen(scope.row)">查看合同信息
+                </el-button>
+            </div>
+        </el-table-column>
+    </el-table>
 </el-container>
 </body>
+
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/setContract",
+                type: "POST",
+                success: function (data1) {
+                    let contracts = data1.contracts;
+                    for (var i = 0; i < contracts.length; i++) {
+                        let contract = contracts[i];
+                        vue.tableData.push(
+                            {
+                                contractnum: contract.contractnum, //合同号
+                                contractname: contract.contractname, //合同名
+                                draft: contract.draft,//起草人
+                                clientname: contract.clientname, //客户名
+                                begintime: contract.begintime, //开始时间
+                                endtime: contract.endtime, //结束时间
+                                content: contract.content,
+                                file: contract.file,
+                                stateNum: contract.stateNum, //状态编号1  2  3  4  5
+                                state: contract.state, //状态
+                                myMissionNum: contract.myMissionNum, //状态编号              1     3         4
+                                myMission: contract.myMission, //状态                       会签   审批      签订
+                                myMissionStateNum: contract.myMissionStateNum, //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                                myMissionState: contract.myMissionState, //状态          待处理                          可处理    已处理
+                            }
+                        );
+                    }
+
+                }
+            });
+        },
+        data() {
+            return {
+                tableData: [{
+                    contractnum: '001', //合同号
+                    contractname: 'ccc', //合同名
+                    draft: 'aaa',//起草人
+                    clientname: 'bbb', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    content:'tergfgsdfg',
+                    file:'false',
+                    stateNum: '1', //状态编号
+                    state: '会签中', //状态
+                    myMissionNum: '1', //状态编号              1     3         4
+                    myMission: '会签', //状态                       会签   审批      签订
+                    myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                    myMissionState: '可处理', //状态          待处理                          可处理    已处理
+                },{
+                    contractnum: '002', //合同号
+                    contractname: 'ccc', //合同名
+                    draft: 'ddd',//起草人
+                    clientname: 'aaa', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    content:'fdvxdxhzdng',
+                    file:'true',
+                    stateNum: '3', //状态编号
+                    state: '审批中', //状态
+                    myMissionNum: '3', //状态编号              1     3         4
+                    myMission: '审批', //状态                       会签   审批      签订
+                    myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                    myMissionState: '可处理', //状态          待处理                          可处理    已处理
+                },{
+                    contractnum: '003', //合同号
+                    contractname: 'ccc', //合同名
+                    draft: 'ddd',//起草人
+                    clientname: 'aaa', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    content:'fdvxdxhzdng',
+                    file:'true',
+                    stateNum: '4', //状态编号
+                    state: '签订中', //状态
+                    myMissionNum: '4', //状态编号              1     3         4
+                    myMission: '签订', //状态                       会签   审批      签订
+                    myMissionStateNum: '0', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                    myMissionState: '可处理', //状态          待处理                          可处理    已处理
+                },{
+                    contractnum: '002', //合同号
+                    contractname: 'ccc', //合同名
+                    draft: 'ddd',//起草人
+                    clientname: 'aaa', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    content:'fdvxdxhzdng',
+                    file:'true',
+                    stateNum: '3', //状态编号
+                    state: '审批中', //状态
+                    myMissionNum: '1', //状态编号              1     3         4
+                    myMission: '会签', //状态                       会签   审批      签订
+                    myMissionStateNum: '1', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                    myMissionState: '已处理', //状态          待处理                          可处理    已处理
+                },{
+                    contractnum: '002', //合同号
+                    contractname: 'ccc', //合同名
+                    draft: 'ddd',//起草人
+                    clientname: 'aaa', //客户名
+                    begintime: '111', //开始时间
+                    endtime: '111', //结束时间
+                    content:'fdvxdxhzdng',
+                    file:'true',
+                    stateNum: '1', //状态编号
+                    state: '会签中', //状态
+                    myMissionNum: '4', //状态编号              1     3         4
+                    myMission: '签订', //状态                       会签   审批      签订
+                    myMissionStateNum: '-1', //状态编号  -1（stateNum<myMissionNum）   0(==)      1(>)
+                    myMissionState: '待处理', //状态          待处理                          可处理    已处理
+                }],
+                manageContract1:false,
+                form_countersign:{
+                    contractnum:'',
+                    copinion:'',
+                },
+                rule_countersign:{
+                    copinion: [{required: true, message: '请输入会签意见', trigger: 'blur'}],
+                },
+                manageContract3:false,
+                form_approval:{
+                    contractnum:'',
+                    astate: '2',
+                    aopinion: '',
+                },
+                rule_approval: {
+                    aopinion: [{required: true, message: '请输入审批意见', trigger: 'blur'}],
+                },
+                manageContract4: false,
+                form_sign: {
+                    contractnum:'',
+                    sinformation:'',
+                },
+                rule_sign: {
+                    sinformation: [{required: true, message: '请输入签订信息', trigger: 'blur'}],
+                },
+                showContract:false,
+                manageContract:{
+                    contractnum: '', //合同号
+                    contractname: '', //合同名
+                    draft: '',//起草人
+                    clientname: '', //客户名
+                    begintime: '', //开始时间
+                    endtime: '', //结束时间
+                    content:'',
+                    file:'',
+                },
+                fd:'',
+            }
+        },
+        methods: {
+            resetDateFilter() {
+                this.$refs.filterTable.clearFilter('stateNum');
+                this.$refs.filterTable.clearFilter('myMissionNum');
+                this.$refs.filterTable.clearFilter('myMissionStateNum');
+            },
+            filterTag_stateNum(values, row) {
+                for (var i = 0; i < values.length; i++) {
+                    let value = values[i];
+                    if (row.stateNum === value)
+                        return true;
+                }
+                return false;
+            },
+            filterTag_missionNum(values, row) {
+                for (var i = 0; i < values.length; i++) {
+                    let value = values[i];
+                    if (row.myMissionNum === value)
+                        return true;
+                }
+                return false;
+            },
+            filterTag_missionStateNum(values, row) {
+                for (var i = 0; i < values.length; i++) {
+                    let value = values[i];
+                    if (row.myMissionStateNum === value)
+                        return true;
+                }
+                return false;
+            },
+            filterHandler(value, row, column) {
+                const property = column['property'];
+                return row[property] === value;
+            },
+            download(contractnum) {
+                var form = $("<form>");//定义一个form表单
+                form.attr("style", "display:none");
+                form.attr("target", "");
+                form.attr("method", "post"); //请求类型
+                form.attr("action", "/downloadFile"); //请求地址
+                var sql = $("<input>");
+                sql.attr("type", "hidden");
+                sql.attr("name", "contractnum");
+                sql.attr("value", contractnum);
+                form.append(sql);
+                $(document.body).append(form)
+                form.submit()
+            },
+            showManageContract1(row) {
+                this.manageContract=row;
+                this.form_countersign.contractnum=row.contractnum;
+                this.manageContract1 = true;
+            },
+            showManageContract3(row) {
+                this.manageContract=row;
+                this.form_approval.contractnum=row.contractnum;
+                this.manageContract3 = true;
+            },
+            showManageContract4(row) {
+                this.manageContract=row;
+                this.form_sign.contractnum=row.contractnum;
+                this.manageContract4=true;
+            },
+            submitForm_countersign() {
+                this.$refs['form_countersign'].validate((valid) => {
+                    if (valid) {
+                        this.$refs.upload.submit();
+                        vue.fd = new FormData();
+                        vue.fd.append("contractnum", this.form_countersign.contractnum);
+                        vue.fd.append("copinion", this.form_countersign.copinion);
+                        $.ajax({
+                            url: "/countersign",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd
+                            ,
+                            success: function (data1) {
+                                var msg = JSON.parse(data1);
+                                if (msg["msg"] == "success") {
+                                    vue.$message({
+                                        message: '会签提交成功!',
+                                        type: 'success'
+                                    });
+                                    vue.showNewcontract = false;
+                                }
+                                else if (msg["msg"] == "fail") {
+                                    vue.$message.error('会签提交失败！');
+                                }
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            submitForm_approval() {
+                this.$refs['form_approval'].validate((valid) => {
+                    if (valid) {
+                        this.$refs.upload.submit();
+                        vue.fd = new FormData();
+                        vue.fd.append("contractnum", this.form_approval.contractnum);
+                        vue.fd.append("astate", this.form_approval.astate);
+                        vue.fd.append("aopinion", this.form_approval.aopinion);
+                        $.ajax({
+                            url: "/approval",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd
+                            ,
+                            success: function (data1) {
+                                var msg = JSON.parse(data1);
+                                if (msg["msg"] == "success") {
+                                    vue.$message({
+                                        message: '审批提交成功!',
+                                        type: 'success'
+                                    });
+                                    vue.showNewcontract = false;
+                                }
+                                else if (msg["msg"] == "fail") {
+                                    vue.$message.error('审批提交失败！');
+                                }
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            submitForm_sign() {
+                this.$refs['form_sign'].validate((valid) => {
+                    if (valid) {
+                        this.$refs.upload.submit();
+                        vue.fd = new FormData();
+                        vue.fd.append("contractnum", this.form_sign.contractnum);
+                        vue.fd.append("sinformation", this.form_sign.astsinformationate);
+                        $.ajax({
+                            url: "/sign",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd
+                            ,
+                            success: function (data1) {
+                                var msg = JSON.parse(data1);
+                                if (msg["msg"] == "success") {
+                                    vue.$message({
+                                        message: '签订提交成功!',
+                                        type: 'success'
+                                    });
+                                    vue.showNewcontract = false;
+                                }
+                                else if (msg["msg"] == "fail") {
+                                    vue.$message.error('签订提交失败！');
+                                }
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            clear_countersign() {
+                 if (confirm("确定清空会签意见吗？"))
+                     this.form_countersign.copinion = '';
+                 else return false;
+            },
+            clear_approval() {
+                 if (confirm("确定清空审批意见吗？"))
+                     this.form_approval.aopinion = '';
+                 else return false;
+            },
+            clear_sign() {
+                 if (confirm("确定清空签订信息吗？"))
+                     this.form_sign.sinformation = '';
+                 else return false;
+            },
+            showContractOpen(row){
+                this.manageContract=row;
+                this.showContract=true;
+            }
+        }
+    })
+</script>
 </html>
