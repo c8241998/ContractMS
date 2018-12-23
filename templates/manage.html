@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html>
+<html  style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -43,7 +43,7 @@
                                     <div slot-scope="scope">
                                         <el-button size="mini" type="primary" style="margin-left: 0px;"
                                                    v-show="scope.row.missionnum=='0'"
-                                                   @click="goto('1-3',scope.row)">前去分配
+                                                   @click="goto('1-3',scope.row,scope.$index)">前去分配
                                         </el-button>
                                         <el-button size="mini" type="primary" style="margin-left: 0px;"
                                                    v-show="scope.row.missionnum=='1'"
@@ -66,7 +66,7 @@
                                 <el-table-column>
                                     <div slot-scope="scope">
                                         <el-button size="mini" type="success" style="margin-left: 0px;"
-                                                   @click="handleDelete(scope.row)">知道了
+                                                   @click="handleDelete(scope.row,scope.$index)">知道了
                                         </el-button>
                                     </div>
                                 </el-table-column>
@@ -146,7 +146,7 @@
 
         <el-container>
             <iframe v-if="iframeScr!=''" :src="iframeScr" height="100%" width="100%"></iframe>
-            <iframe v-else :src="'myContract'" height="100%" width="100%"></iframe>
+            <iframe v-else :src="'myContract'" height="100%" width="100%" ></iframe>
         </el-container>
     </el-container>
 </div>
@@ -169,6 +169,18 @@
                     index.role.fun4 = data1.fun4;
                     index.role.fun5 = data1.fun5;
                     index.role.fun6 = data1.fun6;
+                    let news = data1.news;
+                    for (var i = 0; i < news.length; i++) {
+                        let newmessage = news[i];
+                        index.gridData.push(
+                            {
+                                id: newmessage.id,
+                                contractnum: newmessage.contractnum, //合同号
+                                missionnum: newmessage.missionnum,//0   1    2     3     4
+                                mission: newmessage.mission,//   分配   会签  定稿  审批  签订
+                            }
+                        );
+                    }
                 }
             });
         },
@@ -217,26 +229,23 @@
             logout() {
                 window.location.href = "/logout";
             },
-            handleDelete(tempRow) {
-                vue.$confirm('记得完成任务哦, 是否删除此条通知?', '提示', {
+            handleDelete(tempRow, order) {
+                this.$confirm('记得完成任务哦, 是否删除此条通知?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    vue.fd = new FormData();
-                    vue.fd.append("type", "delete");
-                    vue.fd.append("id", tempRow.id);
+                    index.fd = new FormData();
+                    index.fd.append("type", "delete");
+                    index.fd.append("id", tempRow.id);
                     $.ajax({
                         url: "/news",
                         type: "POST",
                         processData: false,
                         contentType: false,
-                        data: vue.fd,
+                        data: index.fd,
                         success: function (data1) {
-                            if (data1.msg == "success") {
-                                vue.$message.success('删除成功！');
-                                window.location.href = "";
-                            }
+                            index.gridData.splice(order, 1);
                         }
                     })
                 }).catch(() => {
@@ -246,17 +255,20 @@
                     });
                 });
             },
-            goto(id, tempRow) {
-                vue.fd = new FormData();
-                    vue.fd.append("type", "delete");
-                    vue.fd.append("id", tempRow.id);
-                    $.ajax({
-                        url: "/news",
-                        type: "POST",
-                        processData: false,
-                        contentType: false,
-                        data: vue.fd,
-                    })
+            goto(id, tempRow,order) {
+                index.fd = new FormData();
+                index.fd.append("type", "delete");
+                index.fd.append("id", tempRow.id);
+                $.ajax({
+                    url: "/news",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: index.fd,
+                    success: function (data1) {
+                        index.gridData.splice(order, 1);
+                    }
+                })
                 document.getElementById(id).click();
             },
         }

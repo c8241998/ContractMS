@@ -39,8 +39,6 @@ def login(request):
             return HttpResponse(json.dumps(res))
         auth.login(request, re)
 
-        mail("shxy522@outlook.com", "登陆成功!", "合同管理系统", "czd", "登陆成功提示")
-
         res = {'msg': 'success'}
         return HttpResponse(json.dumps(res))
     return render(request, 'login.html');
@@ -85,6 +83,18 @@ def manage(request):
     username = user.username
     if request.method == "POST":
         user_models = models.MyUser.objects.get(username=username)
+        results = models.message.objects.all()
+        news=[]
+        dic = {0:'分配',1:'会签',2:'定稿',3:'审批',4:'签订'}
+        for result in results:
+            news.append(
+                {
+                    'id':result.id,
+                    'contractnum': result.contractnum.contractnum,
+                    'missionnum': result.missionnum,
+                    'mission': dic[result.missionnum],
+                }
+            )
         return JsonResponse(
             {
                 'fun1': user_models.role.fun1,
@@ -93,6 +103,7 @@ def manage(request):
                 'fun4': user_models.role.fun4,
                 'fun5': user_models.role.fun5,
                 'fun6': user_models.role.fun6,
+                'news': news
             }
         )
     else:
@@ -136,6 +147,8 @@ def myContract(request):
             contract = models.Contract(contractname=contractname, clientnum=clientname, begintime=begintime,
                                        endtime=endtime, content=content, file=file, draft=user_models)
             contract.save()
+
+
             return HttpResponse('')
         elif request.POST.get("type") == "info":
             contractnum = request.POST.get("contractnum")
@@ -416,23 +429,44 @@ def setContract(request):
             administration.contractnum = contract
             administration.countersign1 = models.MyUser.objects.get(username=countersign1)
             administration.call=1
+            mail(administration.countersign1.email,'尊敬的用户您好！ 您需要会签一份合同，请及时登录查看！')
+            message1 = models.message(username=administration.countersign1,contractnum=contract,missionnum=1)
+            message1.save()
             if countersign2:
                 administration.call = 2
                 administration.countersign2 = models.MyUser.objects.get(username=countersign2)
+                mail(administration.countersign2.email, '尊敬的用户您好！ 您需要会签一份合同，请及时登录查看！')
+                message2 = models.message(username=administration.countersign2, contractnum=contract, missionnum=1)
+                message2.save()
             if countersign3:
                 administration.call = 3
                 administration.countersign3 = models.MyUser.objects.get(username=countersign3)
+                mail(administration.countersign3.email, '尊敬的用户您好！ 您需要会签一份合同，请及时登录查看！')
+                message3 = models.message(username=administration.countersign3, contractnum=contract, missionnum=1)
+                message3.save()
+
             administration.approval1 = models.MyUser.objects.get(username=approval1)
+            mail(administration.approval1.email, '尊敬的用户您好！ 您需要审核一份合同，请及时登录查看！')
+            message4 = models.message(username=administration.approval1, contractnum=contract, missionnum=3)
+            message4.save()
             administration.aall = 1
             if approval2:
                 administration.aall = 2
                 administration.approval2 = models.MyUser.objects.get(username=approval2)
+                mail(administration.approval2.email, '尊敬的用户您好！ 您需要审核一份合同，请及时登录查看！')
+                message5 = models.message(username=administration.approval2, contractnum=contract, missionnum=3)
+                message5.save()
             if approval3:
                 administration.aall = 3
                 administration.approval3 = models.MyUser.objects.get(username=approval3)
+                mail(administration.approval3.email, '尊敬的用户您好！ 您需要审核一份合同，请及时登录查看！')
+                message6 = models.message(username=administration.approval3, contractnum=contract, missionnum=3)
+                message6.save()
             administration.sign = models.MyUser.objects.get(username=sign)
             administration.save()
-
+            mail(administration.sign.email, '尊敬的用户您好！ 您需要签订一份合同，请及时登录查看！')
+            message7 = models.message(username=administration.sign, contractnum=contract, missionnum=4)
+            message7.save()
             contract.state = 1
             contract.save()
 
@@ -634,3 +668,10 @@ def downloadFile(request):
         response['Content-Disposition'] = 'attachment;filename="' + file.name + '"'
 
         return response
+
+def news(request):
+    if request.method == "POST":
+        if(request.POST.get("type")=="delete"):
+            message = models.message.objects.get(id=request.POST.get('id'))
+            message.delete()
+            return HttpResponse('')

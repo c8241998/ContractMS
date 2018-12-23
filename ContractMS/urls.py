@@ -35,4 +35,5 @@ urlpatterns = [
     url(r'^allClient$', views.allClient, name='allClient'),
     url(r'^log$', views.log, name='log'),
     url(r'^downloadFile$', views.downloadFile, name='downloadFile'),
+    url(r'^news$', views.news, name='news'),
 ]

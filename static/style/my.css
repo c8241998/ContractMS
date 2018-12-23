@@ -24,10 +24,7 @@
     min-height: 400px;
 }
 
-html {
-    overflow-x: hidden;
-    overflow-y: auto;
-}
+html { overflow-x: hidden; overflow-y: auto; }
 
 .item {
   margin-top: 10px;

@@ -3,7 +3,11 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 
     
-def mail(my_receiver,mail_content,sender_name,receiver_name,theme):
+def mail(my_receiver,mail_content):
+    sender_name = '合同管理系统'
+    receiver_name = '尊敬的用户'
+    theme = '合同管理系统温馨提示'
+
     my_sender='185873016@qq.com'    # 发件人邮箱账号
     my_pass = 'wpibkvwjtfohbiab'              # 发件人邮箱密码(当时申请smtp给的口令)
     # my_receiver='569362884@qq.com'      # 收件人邮箱账号，我这边发送给自己

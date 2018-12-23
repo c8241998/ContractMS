@@ -25,7 +25,7 @@ SECRET_KEY = '$wmnu4zfn@458fx*2kys2w+8_xtp3r2+doqqgj_c(2#0cghlqj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition

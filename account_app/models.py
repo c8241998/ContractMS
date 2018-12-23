@@ -135,3 +135,9 @@ class log(models.Model):
     username = models.ForeignKey('MyUser', on_delete=models.DO_NOTHING)
     content = models.CharField(max_length=200)
     time = models.DateTimeField()
+
+class message(models.Model):
+    id = models.AutoField(primary_key=True)
+    username = models.ForeignKey('MyUser',on_delete=models.CASCADE,null=True)
+    contractnum = models.ForeignKey('Contract',on_delete=models.CASCADE,null=True)
+    missionnum = models.IntegerField(default=0, choices=((0, '分配'), (1, '会签'), (2, '定稿'), (3, '审批'), (4, '签订')))

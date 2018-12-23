@@ -2,6 +2,8 @@ from account_app import models
 
 def getContractInfo(contractnum):
 
+    dic={2:'通过',1:'拒绝',0:'未审批'}
+
     contract = models.Contract.objects.get(contractnum=contractnum)
     administration = models.Administration.objects.get(contractnum=contract)
     cInfo = {}
@@ -23,9 +25,9 @@ def getContractInfo(contractnum):
     cInfo['approval2'] = administration.approval2.username if administration.approval2 else "无"
     cInfo['approval3'] = administration.approval3.username if administration.approval3 else "无"
 
-    cInfo['astate1'] = administration.astate1.__str__() if administration.astate1 else "无"
-    cInfo['astate2'] = administration.astate2.__str__() if administration.astate2 else "无"
-    cInfo['astate3'] = administration.astate3.__str__() if administration.astate3 else "无"
+    cInfo['astate1'] = dic[administration.astate1] if administration.astate1 else "无"
+    cInfo['astate2'] = dic[administration.astate2] if administration.astate2 else "无"
+    cInfo['astate3'] = dic[administration.astate3] if administration.astate3 else "无"
 
     cInfo['atime1'] = administration.atime1.__str__() if administration.atime1 else "无"
     cInfo['atime2'] = administration.atime2.__str__() if administration.atime2 else "无"
