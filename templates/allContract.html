@@ -20,7 +20,296 @@
 </head>
 <body>
 <el-container id="table">
-    全部合同
+    <el-dialog title="合同分配信息" :visible.sync="showContractInfo">
+        <el-collapse v-model="activeName" accordion>
+            <el-collapse-item title="会签" name="1">
+                <el-table :data="contractInfo.countersign">
+                    <el-table-column prop="countersignPerson" label="会签人" width="150"></el-table-column>
+                    <el-table-column prop="opinion" label="会签意见"></el-table-column>
+                    <el-table-column prop="ctime" label="会签时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+            <el-collapse-item title="审批" name="2">
+                <el-table :data="contractInfo.approval">
+                    <el-table-column prop="approvalPerson" label="审批人" width="150"></el-table-column>
+                    <el-table-column prop="opinion" label="审批意见"></el-table-column>
+                    <el-table-column prop="astate" label="审批结果"></el-table-column>
+                    <el-table-column prop="atime" label="审批时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+            <el-collapse-item title="签订" name="3">
+                <el-table :data="contractInfo.sign">
+                    <el-table-column prop="signPerson" label="签订人" width="150"></el-table-column>
+                    <el-table-column prop="sinformation" label="签订信息"></el-table-column>
+                    <el-table-column prop="stime" label="签订时间" width="150"></el-table-column>
+                </el-table>
+            </el-collapse-item>
+        </el-collapse>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showContractInfo = false">我知道啦</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="查看合同内容" :visible.sync="showContract">
+        <el-form>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="合同号" :label-width="formLabelWidth">
+                        <span>[[ focusContract.contractnum ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="18">
+                    <el-form-item label="合同名称" :label-width="formLabelWidth">
+                        <span>[[ focusContract.contractname ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="起草人" :label-width="formLabelWidth">
+                        <span>[[ focusContract.draft ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="客户名" :label-width="formLabelWidth">
+                        <span>[[ focusContract.clientname ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="开始时间" :label-width="formLabelWidth">
+                        <span>[[ focusContract.begintime ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="结束时间" :label-width="formLabelWidth">
+                        <span>[[ focusContract.endtime ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-form-item label="合同内容" :label-width="formLabelWidth">
+                <el-input type="textarea" autosize placeholder=" focusContract.content"
+                          v-model="focusContract.content" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="附件" :label-width="formLabelWidth">
+                        <span v-if="focusContract.file=='true'">
+                            <el-button type="text" @click="download(focusContract.contractnum)">下载</el-button>
+                        </span>
+                <span v-else>
+                            无
+                        </span>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showContract = false">我看完啦</el-button>
+        </div>
+    </el-dialog>
+    <el-header style="text-align: right; font-size: 12px">
+        <el-row>
+            <el-col :span="8">
+                <el-input placeholder="输入合同名搜索" v-model="search" size="mini" clearable></el-input>
+            </el-col>
+            <el-col :span="16">
+                <el-button @click="resetFilter">取消筛选</el-button>
+            </el-col>
+        </el-row>
+    </el-header>
+    <el-table
+            :data="tableData.filter(data => !search || data.contractname.toLowerCase().includes(search.toLowerCase()))"
+            style="width: 100%">
+        <el-table-column type="expand">
+            <div slot-scope="c">
+                <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="合同名称">
+                        <span>[[ c.row.contractname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="客户名">
+                        <span>[[ c.row.clientname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="状态">
+                        <span>[[ c.row.state ]]</span>
+                    </el-form-item>
+                    <el-form-item label="合同内容">
+                        <el-button icon="el-icon-search" circle size="small"
+                                   @click="showContractOpen(c.row)"></el-button>
+                    </el-form-item>
+                    <el-form-item label="附件"
+                                  v-show="c.row.stateNum!='2'">
+                        <span v-if="c.row.file=='true'">
+                            <el-button type="text" @click="download(c.row.contractnum)">下载</el-button>
+                        </span>
+                        <span v-else>
+                            无
+                        </span>
+                    </el-form-item>
+                    <el-form-item label="会签信息"
+                                  v-show="c.row.stateNum==1||c.row.stateNum==2||c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
+                        <el-button icon="el-icon-search" circle size="small"
+                                   @click="showContractInfoOpen(c.row,'1')"></el-button>
+                    </el-form-item>
+                    <el-form-item label="审批信息" v-show="c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
+                        <el-button icon="el-icon-search" circle size="small"
+                                   @click="showContractInfoOpen(c.row,'2')"></el-button>
+                    </el-form-item>
+                    <el-form-item label="签订信息" v-show="c.row.stateNum==4||c.row.stateNum==5">
+                        <el-button icon="el-icon-search" circle size="small"
+                                   @click="showContractInfoOpen(c.row,'3')"></el-button>
+                    </el-form-item>
+
+                </el-form>
+            </div>
+        </el-table-column>
+        <el-table-column label="合同ID" prop="contractnum" sortable></el-table-column>
+        <el-table-column label="合同名称" prop="contractname"></el-table-column>
+        <el-table-column label="客户名" prop="clientname"></el-table-column>
+        <el-table-column label="起草人" prop="draft" sortable></el-table-column>
+        <el-table-column label="开始时间" prop="begintime" sortable></el-table-column>
+        <el-table-column label="结束时间" prop="endtime" sortable></el-table-column>
+        <el-table-column label="合同状态" prop="state" sortable column-key="stateNum"
+                         :filters="[{ text: '待分配', value: ['0'] },
+                         { text: '会签中', value: ['1'] },
+                         { text: '定稿中', value: ['2'] },
+                         { text: '审批中', value: ['3'] },
+                         { text: '签订中', value: ['4'] },
+                         { text: '签订完成', value: ['5'] },
+                          { text: '审批未通过', value: ['-1'] } ]"
+                         :filter-method="filterTag_stateNum"
+                         filter-placement="bottom-end">
+        </el-table-column>
+    </el-table>
 </el-container>
 </body>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/allContract",
+                type: "POST",
+                data: {"type": "init"},
+                success: function (data1) {
+                    var contracts = JSON.parse(data1).contracts;
+                    for (var i = 0; i < contracts.length; i++) {
+                        let contract = contracts[i];
+                        vue.tableData.push(
+                            {
+                                contractnum: contract.contractnum, //合同号
+                                contractname: contract.contractname, //合同名
+                                clientname: contract.clientname, //客户名
+                                begintime: contract.begintime, //开始时间
+                                endtime: contract.endtime, //结束时间
+                                stateNum: contract.stateNum, //状态编号
+                                state: contract.state,//状态
+                                draft: contract.draft,//起草人
+                                content: contract.content, //合同内容
+                                file: contract.file //文件是否存在
+                            }
+                        );
+                    }
+
+                }
+            })
+        },
+        data() {
+            return {
+                showContractInfo: false,
+                activeName: '1',
+                contractInfo: [],
+                tableData: [],
+                formLabelWidth: '100px',
+                showContract: false,
+                focusContract: '',
+                search: '',
+            };
+        },
+        methods: {
+            resetFilter() {
+                this.$refs.filterTable.clearFilter('stateNum');
+            },
+            filterTag_stateNum(values, row) {
+                for (var i = 0; i < values.length; i++) {
+                    let value = values[i];
+                    if (row.stateNum === value)
+                        return true;
+                }
+                return false;
+            },
+            filterHandler(value, row, column) {
+                const property = column['property'];
+                return row[property] === value;
+            },
+            download(contractnum) {
+                var form = $("<form>");//定义一个form表单
+                form.attr("style", "display:none");
+                form.attr("target", "");
+                form.attr("method", "post"); //请求类型
+                form.attr("action", "/downloadFile"); //请求地址
+                var sql = $("<input>");
+                sql.attr("type", "hidden");
+                sql.attr("name", "contractnum");
+                sql.attr("value", contractnum);
+                form.append(sql);
+                $(document.body).append(form)
+                form.submit()
+            },
+            showContractInfoOpen(row, activeName) {
+                this.activeName = activeName;
+                this.showContractInfo = true;
+                $.ajax({
+                    url: "/allContract",
+                    type: "POST",
+                    data: {"type": "info", "contractnum": row.contractnum},
+                    success: function (data1) {
+                        var cInfo = data1.cInfo;
+                        vue.contractInfo =
+                            {
+                                contractnum: cInfo.contractnum,
+                                countersign: [
+                                    {
+                                        countersignPerson: cInfo.countersign1,
+                                        opinion: cInfo.copinion1,
+                                        ctime: cInfo.ctime1,
+                                    }, {
+                                        countersignPerson: cInfo.countersign2,
+                                        opinion: cInfo.copinion2,
+                                        ctime: cInfo.ctime2,
+                                    }, {
+                                        countersignPerson: cInfo.countersign3,
+                                        opinion: cInfo.copinion3,
+                                        ctime: cInfo.ctime3,
+                                    }
+                                ],
+                                approval: [{
+                                    approvalPerson: cInfo.approval1,
+                                    astate: cInfo.astate1,
+                                    opinion: cInfo.aopinion1,
+                                    atime: cInfo.atime1,
+                                }, {
+                                    approvalPerson: cInfo.approval2,
+                                    astate: cInfo.astate2,
+                                    opinion: cInfo.aopinion2,
+                                    atime: cInfo.atime2,
+                                }, {
+                                    approvalPerson: cInfo.approval3,
+                                    astate: cInfo.astate3,
+                                    opinion: cInfo.aopinion3,
+                                    atime: cInfo.atime3,
+                                }],
+                                sign: [{
+                                    signPerson: cInfo.sign,
+                                    sinformation: cInfo.sinformation,
+                                    stime: cInfo.stime,
+                                }],
+                            }
+                        {#);#}
+                    }
+                })
+            },
+            showContractOpen(row) {
+                this.focusContract = row;
+                this.showContract = true;
+            }
+        }
+    })
+</script>
 </html>

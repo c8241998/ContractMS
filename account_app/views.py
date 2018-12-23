@@ -10,6 +10,7 @@ from django.http import FileResponse
 from django.http import JsonResponse
 from .mailSender import *
 from .contractInfo import *
+from django.db.models import Q
 
 
 # Create your views here.
@@ -122,6 +123,20 @@ def myContract(request):
                 contracts.append(contract)
             json_ = {'contracts': contracts}
             return HttpResponse(json.dumps(json_))
+        if request.POST.get("type") =="draft":
+            contractname = request.POST.get("contractname")
+            clientname = models.Client.objects.get(clientname=request.POST.get("clientname"))
+            begintime = request.POST.get("begintime")
+            endtime = request.POST.get("endtime")
+
+            content = request.POST.get("content")
+            file = request.FILES.get("file", "")
+            user = get_user(request)
+            user_models = models.MyUser.objects.get(email=user.email)
+            contract = models.Contract(contractname=contractname, clientnum=clientname, begintime=begintime,
+                                       endtime=endtime, content=content, file=file, draft=user_models)
+            contract.save()
+            return HttpResponse('')
         elif request.POST.get("type") == "info":
             contractnum = request.POST.get("contractnum")
             cInfo = getContractInfo(contractnum)
@@ -148,26 +163,215 @@ def myContract(request):
         return render(request, "mycontract.html", json_)
 
 
-def newContract(request):
-    if request.method == "POST":
-        contractname = request.POST.get("contractname")
-        clientname = models.Client.objects.get(clientname=request.POST.get("clientname"))
-        begintime = request.POST.get("begintime")
-        endtime = request.POST.get("endtime")
-
-        content = request.POST.get("content")
-        file = request.FILES.get("file", "")
-        user = get_user(request)
-        user_models = models.MyUser.objects.get(email=user.email)
-        contract = models.Contract(contractname=contractname, clientnum=clientname, begintime=begintime,
-                                   endtime=endtime, content=content, file=file, draft=user_models)
-        contract.save()
-        msg = {'msg': 'success'}
-        return HttpResponse(json.dumps(msg))
-
 
 def myManageContract(request):
-    return render(request, 'myManageContract.html')
+    if request.method == "POST":
+        type = request.POST.get("type")
+        if type == "init":
+            user = models.MyUser.objects.get(username = get_user(request).username)
+            results = models.Administration.objects.filter(
+                Q(countersign1=user)|Q(countersign2=user)|Q(countersign3=user)|
+                Q(approval1=user) | Q(approval2=user) | Q(approval3=user) |
+                Q(sign=user)
+            )
+            contracts = []
+            dic = {'0': '待分配', '1': '会签中', '2': '定稿中', '3': '审批中', '4': '签订中', '5': '签订完成'}
+            for result_ in results:
+                contract = {}
+                result = result_.contractnum
+                contract["contractnum"] = result.contractnum
+                contract["contractname"] = result.contractname
+                contract['draft'] = result.draft.username
+                clientname = result.clientnum.clientname if result.clientnum else '(客户已被删除)'
+                contract['clientname'] = clientname
+                contract['begintime'] = result.begintime.__str__()
+                contract['endtime'] = result.endtime.__str__()
+                contract['state'] = dic.get(result.state.__str__())
+                contract['stateNum'] = result.state.__str__()
+                contract['content'] = result.content
+                contract['file'] = 'true' if result.file else 'false'
+
+                if result_.countersign1==user:
+                    contract_1 = contract.copy()
+                    contract_1['myMissionNum'] = '1'
+                    contract_1['myMission'] = '会签'
+                    if result.state.__str__() < contract_1['myMissionNum']:
+                        contract_1['myMissionStateNum'] = '-1'
+                        contract_1['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_1['myMissionNum'] and not result_.copinion1:
+                        contract_1['myMissionStateNum'] = '0'
+                        contract_1['myMissionState'] = '可处理'
+                    else:
+                        contract_1['myMissionStateNum'] = '1'
+                        contract_1['myMissionState'] = '已处理'
+                    contracts.append(contract_1)
+                elif result_.countersign2==user:
+                    contract_1 = contract.copy()
+                    contract_1['myMissionNum'] = '1'
+                    contract_1['myMission'] = '会签'
+                    if result.state.__str__() < contract_1['myMissionNum']:
+                        contract_1['myMissionStateNum'] = '-1'
+                        contract_1['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_1['myMissionNum'] and not result_.copinion2:
+                        contract_1['myMissionStateNum'] = '0'
+                        contract_1['myMissionState'] = '可处理'
+                    else:
+                        contract_1['myMissionStateNum'] = '1'
+                        contract_1['myMissionState'] = '已处理'
+                    contracts.append(contract_1)
+                else:
+                    contract_1 = contract.copy()
+                    contract_1['myMissionNum'] = '1'
+                    contract_1['myMission'] = '会签'
+                    if result.state.__str__() < contract_1['myMissionNum']:
+                        contract_1['myMissionStateNum'] = '-1'
+                        contract_1['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_1['myMissionNum'] and not result_.copinion3:
+                        contract_1['myMissionStateNum'] = '0'
+                        contract_1['myMissionState'] = '可处理'
+                    else:
+                        contract_1['myMissionStateNum'] = '1'
+                        contract_1['myMissionState'] = '已处理'
+                    contracts.append(contract_1)
+
+                if result_.approval1==user:
+                    contract_2 = contract.copy()
+                    contract_2['myMissionNum'] = '3'
+                    contract_2['myMission'] = '审批'
+                    if result.state.__str__() < contract_2['myMissionNum']:
+                        contract_2['myMissionStateNum'] = '-1'
+                        contract_2['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_2['myMissionNum'] and not result_.aopinion1:
+                        contract_2['myMissionStateNum'] = '0'
+                        contract_2['myMissionState'] = '可处理'
+                    else:
+                        contract_2['myMissionStateNum'] = '1'
+                        contract_2['myMissionState'] = '已处理'
+                    contracts.append(contract_2)
+                elif result_.approval2==user:
+                    contract_2 = contract.copy()
+                    contract_2['myMissionNum'] = '3'
+                    contract_2['myMission'] = '审批'
+                    if result.state.__str__() < contract_2['myMissionNum']:
+                        contract_2['myMissionStateNum'] = '-1'
+                        contract_2['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_2['myMissionNum'] and not result_.aopinion2:
+                        contract_2['myMissionStateNum'] = '0'
+                        contract_2['myMissionState'] = '可处理'
+                    else:
+                        contract_2['myMissionStateNum'] = '1'
+                        contract_2['myMissionState'] = '已处理'
+                    contracts.append(contract_2)
+                else:
+                    contract_2 = contract.copy()
+                    contract_2['myMissionNum'] = '3'
+                    contract_2['myMission'] = '审批'
+                    if result.state.__str__() < contract_2['myMissionNum']:
+                        contract_2['myMissionStateNum'] = '-1'
+                        contract_2['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_2['myMissionNum'] and not result_.aopinion3:
+                        contract_2['myMissionStateNum'] = '0'
+                        contract_2['myMissionState'] = '可处理'
+                    else:
+                        contract_2['myMissionStateNum'] = '1'
+                        contract_2['myMissionState'] = '已处理'
+                    contracts.append(contract_2)
+
+                if result_.sign==user:
+                    contract_3 = contract.copy()
+                    contract_3['myMissionNum'] = '4'
+                    contract_3['myMission'] = '签订'
+                    if result.state.__str__() < contract_3['myMissionNum']:
+                        contract_3['myMissionStateNum'] = '-1'
+                        contract_3['myMissionState'] = '待处理'
+                    elif result.state.__str__() == contract_3['myMissionNum']:
+                        contract_3['myMissionStateNum'] = '0'
+                        contract_3['myMissionState'] = '可处理'
+                    else:
+                        contract_3['myMissionStateNum'] = '1'
+                        contract_3['myMissionState'] = '已处理'
+                    contracts.append(contract_3)
+            return JsonResponse({'contracts':contracts})
+        if type =="countersign":
+            user = models.MyUser.objects.get(username=get_user(request).username)
+            contractnum = request.POST.get("contractnum")
+            copinion = request.POST.get("copinion")
+            administration = models.Administration.objects.get(contractnum = models.Contract.objects.get(contractnum=contractnum))
+            end = False
+            if administration.countersign1 == user:
+                administration.ctime1 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.copinion1 = copinion
+                administration.chas += 1
+                if administration.chas == administration.call:
+                    end=True
+            elif administration.countersign2 == user:
+                administration.ctime2 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.copinion2 = copinion
+                administration.chas += 1
+                if administration.chas == administration.call:
+                    end = True
+            elif administration.countersign3 == user:
+                administration.ctime3 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.copinion3 = copinion
+                administration.chas += 1
+                if administration.chas == administration.call:
+                    end = True
+            if end == True:
+                contract = models.Contract.objects.get(contractnum=contractnum)
+                contract.state = 2
+                contract.save()
+            administration.save()
+            return HttpResponse('')
+        if type =="approval":
+            user = models.MyUser.objects.get(username=get_user(request).username)
+            contractnum = request.POST.get("contractnum")
+            astate = request.POST.get("astate")
+            aopinion = request.POST.get("aopinion")
+            administration = models.Administration.objects.get(contractnum = models.Contract.objects.get(contractnum=contractnum))
+            if astate == 'false':
+                administration.contractnum.state=-1
+                administration.save()
+                return HttpResponse('')
+            end = False
+            if administration.approval1 == user:
+                administration.atime1 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.astate1 = 2
+                administration.aopinion1 = aopinion
+                administration.ahas += 1
+                if administration.ahas == administration.aall:
+                    end = True
+            elif administration.approval2 == user:
+                administration.atime2 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.astate2 = 2
+                administration.aopinion2 = aopinion
+                administration.ahas += 1
+                if administration.ahas == administration.aall:
+                    end = True
+            elif administration.approval3 == user:
+                administration.atime3 = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                administration.astate3 = 2
+                administration.ahas += 1
+                if administration.ahas == administration.aall:
+                    end = True
+            if end == True:
+                contract = models.Contract.objects.get(contractnum=contractnum)
+                contract.state = 4
+                contract.save()
+            administration.save()
+            return HttpResponse('')
+        if type =="sign":
+            contractnum = request.POST.get("contractnum")
+            sinformation = request.POST.get("sinformation")
+            administration = models.Administration.objects.get(
+                contractnum=models.Contract.objects.get(contractnum=contractnum))
+            administration.sinformation = sinformation
+            contract = models.Contract.objects.get(contractnum=contractnum)
+            contract.state = 5
+            contract.save()
+            administration.save()
+            return HttpResponse('')
+    else:
+        return render(request, 'myManageContract.html')
 
 
 def setContract(request):
@@ -211,14 +415,20 @@ def setContract(request):
             administration = models.Administration()
             administration.contractnum = contract
             administration.countersign1 = models.MyUser.objects.get(username=countersign1)
+            administration.call=1
             if countersign2:
+                administration.call = 2
                 administration.countersign2 = models.MyUser.objects.get(username=countersign2)
             if countersign3:
+                administration.call = 3
                 administration.countersign3 = models.MyUser.objects.get(username=countersign3)
             administration.approval1 = models.MyUser.objects.get(username=approval1)
+            administration.aall = 1
             if approval2:
+                administration.aall = 2
                 administration.approval2 = models.MyUser.objects.get(username=approval2)
             if approval3:
+                administration.aall = 3
                 administration.approval3 = models.MyUser.objects.get(username=approval3)
             administration.sign = models.MyUser.objects.get(username=sign)
             administration.save()

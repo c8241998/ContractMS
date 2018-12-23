@@ -31,6 +31,51 @@
         <div id="navbarExampleTransparentExample" class="navbar-menu">
             <div class="navbar-end">
                 <div class="navbar-item">
+                    <el-badge :value="gridData.length" class="item">
+                        <el-popover
+                                placement="bottom"
+                                width="400"
+                                trigger="click">
+                            <el-table :data="gridData">
+                                <el-table-column width="100" property="contractnum" label="合同编号"></el-table-column>
+                                <el-table-column width="100" property="mission" label="任务"></el-table-column>
+                                <el-table-column>
+                                    <div slot-scope="scope">
+                                        <el-button size="mini" type="primary" style="margin-left: 0px;"
+                                                   v-show="scope.row.missionnum=='0'"
+                                                   @click="goto('1-3',scope.row)">前去分配
+                                        </el-button>
+                                        <el-button size="mini" type="primary" style="margin-left: 0px;"
+                                                   v-show="scope.row.missionnum=='1'"
+                                                   @click="goto('1-2',scope.row)">前去会签
+                                        </el-button>
+                                        <el-button size="mini" type="primary" style="margin-left: 0px;"
+                                                   v-show="scope.row.missionnum=='2'"
+                                                   @click="goto('1-1',scope.row)">前去定稿
+                                        </el-button>
+                                        <el-button size="mini" type="primary" style="margin-left: 0px;"
+                                                   v-show="scope.row.missionnum=='3'"
+                                                   @click="goto('1-2',scope.row)">前去审批
+                                        </el-button>
+                                        <el-button size="mini" type="primary" style="margin-left: 0px;"
+                                                   v-show="scope.row.missionnum=='4'"
+                                                   @click="goto('1-2',scope.row)">前去签订
+                                        </el-button>
+                                    </div>
+                                </el-table-column>
+                                <el-table-column>
+                                    <div slot-scope="scope">
+                                        <el-button size="mini" type="success" style="margin-left: 0px;"
+                                                   @click="handleDelete(scope.row)">知道了
+                                        </el-button>
+                                    </div>
+                                </el-table-column>
+                            </el-table>
+                            <el-button icon="el-icon-bell" circle size="small" slot="reference"></el-button>
+                        </el-popover>
+                    </el-badge>
+                </div>
+                <div class="navbar-item">
                     <p>欢迎回来，{{ username }}</p>
                 </div>
                 <div class="navbar-item">
@@ -48,54 +93,54 @@
     <el-container v-bind:style="{border: '1px solid #eee', height:myheight}">
         <el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose"
                  :collapse="isCollapse">
-            <el-submenu index="1">
+            <el-submenu id="1" index="1">
                 <template slot="title">
                     <i class="mdui-icon material-icons">&#xe85d;</i>
                     <span slot="title">合同管理</span>
                 </template>
-                <el-menu-item index="1-1" data-target="#assignment1" @click="setiframeScr('myContract')">
+                <el-menu-item id="1-1" index="1-1" data-target="#assignment1" @click="setiframeScr('myContract')">
                     <i class="el-icon-edit"></i>
                     我起草的合同
                 </el-menu-item>
-                <el-menu-item index="1-2" data-target="#assignment1" @click="setiframeScr('myManageContract')">
+                <el-menu-item id="1-2" index="1-2" data-target="#assignment1" @click="setiframeScr('myManageContract')">
                     <i class="el-icon-view"></i>
                     我管理的合同
                 </el-menu-item>
-                <el-menu-item index="1-3" data-target="#assignment" @click="setiframeScr('setContract')">
+                <el-menu-item id="1-3" index="1-3" data-target="#assignment" @click="setiframeScr('setContract')">
                     <i class="el-icon-share"></i>
                     分配合同
                 </el-menu-item>
-                <el-menu-item index="1-4" data-target="#assignment1" @click="setiframeScr('allContract')">
+                <el-menu-item id="1-4" index="1-4" data-target="#assignment1" @click="setiframeScr('allContract')">
                     <i class="el-icon-tickets"></i>
                     全部合同
                 </el-menu-item>
             </el-submenu>
-            <el-menu-item index="2" @click="setiframeScr('role')">
+            <el-menu-item id="2" index="2" @click="setiframeScr('role')">
                 <i class="mdui-icon material-icons">&#xe85e;</i>
                 <span slot="title">角色管理</span>
             </el-menu-item>
-            <el-menu-item index="3" @click="setiframeScr('user')">
+            <el-menu-item id="3" index="3" @click="setiframeScr('user')">
                 <i class="mdui-icon material-icons">&#xe853;</i>
                 <span slot="title">用户管理</span>
             </el-menu-item>
-            <el-submenu index="4">
+            <el-submenu id="4" index="4">
                 <template slot="title">
                     <i class="mdui-icon material-icons">&#xe87c;</i>
                     <span slot="title">客户管理</span>
                 </template>
-                <el-menu-item index="4-1" data-target="#assignment" @click="setiframeScr('myClient')">
+                <el-menu-item id="4-1" index="4-1" data-target="#assignment" @click="setiframeScr('myClient')">
                     <i class="el-icon-service"></i>
                     我的客户
                 </el-menu-item>
-                <el-menu-item index="4-2" data-target="#assignment1" @click="setiframeScr('allClient')">
+                <el-menu-item id="4-2" index="4-2" data-target="#assignment1" @click="setiframeScr('allClient')">
                     <i class="el-icon-news"></i>
                     全部客户
                 </el-menu-item>
             </el-submenu>
-            <el-menu-item index="5" @click="setiframeScr('log')">
-                <i class="mdui-icon material-icons">&#xe86d;</i>
-                <span slot="title">日志</span>
-            </el-menu-item>
+            {#            <el-menu-item index="5" @click="setiframeScr('log')">#}
+            {#                <i class="mdui-icon material-icons">&#xe86d;</i>#}
+            {#                <span slot="title">日志</span>#}
+            {#            </el-menu-item>#}
         </el-menu>
 
 
@@ -110,6 +155,7 @@
 
 <script>
     var index = new Vue({
+        delimiters: ['[[', ']]'],
         el: '#index',
         created: function () {
             this.setmyheight();
@@ -124,7 +170,7 @@
                     index.role.fun5 = data1.fun5;
                     index.role.fun6 = data1.fun6;
                 }
-            })
+            });
         },
         data() {
             return {
@@ -138,7 +184,8 @@
                     fun4: false,
                     fun5: false,
                     fun6: false,
-                }
+                },
+                gridData: []
             };
         },
         methods: {
@@ -169,7 +216,49 @@
             },
             logout() {
                 window.location.href = "/logout";
-            }
+            },
+            handleDelete(tempRow) {
+                vue.$confirm('记得完成任务哦, 是否删除此条通知?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("id", tempRow.id);
+                    $.ajax({
+                        url: "/news",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd,
+                        success: function (data1) {
+                            if (data1.msg == "success") {
+                                vue.$message.success('删除成功！');
+                                window.location.href = "";
+                            }
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            goto(id, tempRow) {
+                vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("id", tempRow.id);
+                    $.ajax({
+                        url: "/news",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd,
+                    })
+                document.getElementById(id).click();
+            },
         }
     })
 

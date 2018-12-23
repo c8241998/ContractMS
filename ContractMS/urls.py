@@ -26,7 +26,6 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^manage$', views.manage, name='manage'),
     url(r'^myContract$', views.myContract, name='myContract'),
-    url(r'^newContract$', views.newContract, name='newContract'),
     url(r'^myManageContract$', views.myManageContract, name='myManageContract'),
     url(r'^setContract$', views.setContract, name='setContract'),
     url(r'^allContract$', views.allContract, name='allContract'),

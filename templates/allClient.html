@@ -21,7 +21,87 @@
 </head>
 <body>
 <el-container id="table">
-    全部客户
+    <el-header style="text-align: right; font-size: 12px">
+        <el-row>
+            <el-col :span="8">
+                <el-input placeholder="输入客户名搜索" v-model="search" size="mini" clearable></el-input>
+            </el-col>
+        </el-row>
+    </el-header>
+    <el-table :data="tableData.filter(data => !search || data.clientname.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
+        <el-table-column type="expand">
+            <div slot-scope="c">
+                <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="客户名称">
+                        <span>[[ c.row.clientname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="地址">
+                        <span>[[ c.row.address ]]</span>
+                    </el-form-item>
+                    <el-form-item label="银行名称">
+                        <span>[[ c.row.bank ]]</span>
+                    </el-form-item>
+                    <el-form-item label="邮编">
+                        <span>[[ c.row.code ]]</span>
+                    </el-form-item>
+                    <el-form-item label="银行账户">
+                        <span>[[ c.row.account ]]</span>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <span>[[ c.row.addition ]]</span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-table-column>
+        <el-table-column prop="clientnum" label="客户编号" sortable></el-table-column>
+        <el-table-column prop="clientname" label="客户名称"></el-table-column>
+        <el-table-column prop="tel" label="电话"></el-table-column>
+        <el-table-column prop="fax" label="传真"></el-table-column>
+        <el-table-column prop="username" label="接待人" sortable></el-table-column>
+    </el-table>
 </el-container>
 </body>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/allClient",
+                type: "POST",
+                data: {"type": "init"},
+                success: function (data1) {
+                    let clients = data1.clients;
+                    for (var i = 0; i < clients.length; i++) {
+                        let client = clients[i];
+                        vue.tableData.push(
+                            {
+                                clientnum: client.clientnum,
+                                clientname: client.clientname,
+                                tel: client.tel,
+                                fax: client.fax,
+                                address: client.address,
+                                code: client.code,
+                                bank: client.bank,
+                                account: client.account,
+                                addition: client.addition,
+                                username: client.username,
+                            }
+                        );
+                    }
+                }
+            });
+        },
+        data() {
+            return {
+                formLabelWidth: '100px',
+                tableData: [],
+                search: '',
+            }
+        },
+        methods: {}
+    })
+</script>
 </html>

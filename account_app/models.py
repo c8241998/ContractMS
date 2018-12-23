@@ -82,7 +82,7 @@ class Contract(models.Model):
     endtime = models.DateField()
     content = models.CharField(max_length=200)
     draft = models.ForeignKey('MyUser',on_delete=models.SET_NULL,null=True)
-    state = models.IntegerField(default=0,choices=((0,'待分配'),(1,'会签中'),(2,'定稿中'),(3,'审批中'),(4,'签订中'),(5,'签订完成')))
+    state = models.IntegerField(default=0,choices=((-1,'未通过'),(0,'待分配'),(1,'会签中'),(2,'定稿中'),(3,'审批中'),(4,'签订中'),(5,'签订完成')))
     file = models.FileField(upload_to='uploads/',blank=True,null=True,default=None)
 
 class Client(models.Model):
@@ -108,6 +108,8 @@ class Administration(models.Model):
     countersign3 = models.ForeignKey('MyUser', on_delete=models.SET_NULL, null=True,related_name='c3',default=None)
     copinion3 = models.CharField(max_length=100,null=True,default=None)
     ctime3 = models.DateTimeField(null=True,default=None)
+    call = models.IntegerField(default=3)
+    chas = models.IntegerField(default=0)
 
     approval1 = models.ForeignKey('MyUser',on_delete=models.SET_NULL,null=True,related_name='a1')
     astate1 = models.IntegerField(default=0,choices=((0,'未审批'),(1,'拒绝'),(2,'通过')))
@@ -121,6 +123,8 @@ class Administration(models.Model):
     astate3 = models.IntegerField(default=0, choices=((0, '未审批'), (1, '拒绝'), (2, '通过')))
     atime3 = models.DateTimeField(null=True,default=None)
     aopinion3 = models.CharField(max_length=100, null=True, default=None)
+    aall = models.IntegerField(default=3)
+    ahas = models.IntegerField(default=0)
 
     sign = models.ForeignKey('MyUser',on_delete=models.SET_NULL,null=True)
     sinformation = models.CharField(max_length=100,null=True,default=None)

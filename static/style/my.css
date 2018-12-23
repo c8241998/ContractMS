@@ -28,3 +28,8 @@ html {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+.item {
+  margin-top: 10px;
+  margin-right: 40px;
+}

@@ -52,6 +52,41 @@
             <el-button type="primary" @click="submitForm">提 交</el-button>
         </div>
     </el-dialog>
+    <el-dialog title="修改客户信息" :visible.sync="showEditClient">
+        <el-form :model="form" ref="form" :rules="rules">
+             <el-form-item label="客户编号" :label-width="formLabelWidth" prop="clientnum">
+                <el-input v-model="form.clientnum" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="客户名" :label-width="formLabelWidth" prop="clientname">
+                <el-input v-model="form.clientname"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth" prop="tel">
+                <el-input v-model="form.tel"></el-input>
+            </el-form-item>
+            <el-form-item label="传真" :label-width="formLabelWidth" prop="fax">
+                <el-input v-model="form.fax"></el-input>
+            </el-form-item>
+            <el-form-item label="邮编" :label-width="formLabelWidth" prop="code">
+                <el-input v-model="form.code" ></el-input>
+            </el-form-item>
+            <el-form-item label="地址" :label-width="formLabelWidth" prop="address">
+                <el-input v-model="form.address" ></el-input>
+            </el-form-item>
+            <el-form-item label="银行名称" :label-width="formLabelWidth" prop="bank">
+                <el-input v-model="form.bank" ></el-input>
+            </el-form-item>
+            <el-form-item label="银行账户" :label-width="formLabelWidth" prop="account">
+                <el-input v-model="form.account" ></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth" prop="addition">
+                <el-input v-model="form.addition" ></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear();">重 置</el-button>
+            <el-button type="primary" @click="submitForm">提 交</el-button>
+        </div>
+    </el-dialog>
     <el-header style="text-align: right; font-size: 12px">
         <el-button icon="el-icon-circle-plus-outline" @click="showNewClient=true">添加客户</el-button>
     </el-header>
@@ -89,6 +124,9 @@
                 <el-button size="mini" type="primary" style="margin-left: 0px;"
                            @click="deleteRow(scope.row)">删除我的客户
                 </el-button>
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           @click="editRow(scope.row)">修改客户信息
+                </el-button>
             </div>
         </el-table-column>
     </el-table>
@@ -122,7 +160,6 @@
                             }
                         );
                     }
-
                 }
             });
         },
@@ -162,9 +199,21 @@
             return {
                 fd: '',
                 formLabelWidth: '100px',
-                tableData: [],
+                tableData: [{
+                    clientnum:'111',
+                    clientname: '111',
+                    tel: '',
+                    fax: '',
+                    address: '',
+                    code: '',
+                    bank: '',
+                    account: '',
+                    addition: '',
+                }],
                 showNewClient: false,
+                showEditClient:false,
                 form: {
+                    clientnum:'',
                     clientname: '',
                     tel: '',
                     fax: '',
@@ -226,7 +275,11 @@
                 });
             },
             clear() {
-                if (confirm("确定清空所有内容吗？")) {
+                vue.$confirm('此操作将清空此客户所有信息, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
                     this.form.clientname = '';
                     this.form.tel = '';
                     this.form.fax = '';
@@ -235,13 +288,19 @@
                     this.form.bank = '';
                     this.form.account = '';
                     this.form.addition = '';
-                }
-                else {
-                    return false;
-                }
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消清空'
+                    });
+                });
             },
             deleteRow(tempRow) {
-                if (confirm("确定删除吗？")) {
+                vue.$confirm('此操作将永久删除该客户, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
                     vue.fd = new FormData();
                     vue.fd.append("type", "delete");
                     vue.fd.append("clientnum", tempRow.clientnum);
@@ -253,13 +312,45 @@
                         data: vue.fd,
                         success: function () {
                             vue.$message.success('删除成功！');
-                            window.location.href="";
+                            window.location.href = "";
                         }
                     })
-                }
-                else {
-                    return false;
-                }
+               }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            editRow(row){
+                this.form=row;
+                this.showEditClient=true;
+            },
+            saveRow() {
+                vue.fd = new FormData();
+                vue.fd.append("type", "save");
+                vue.fd.append("clientnum", this.form.clientnum);
+                vue.fd.append("clientname", this.form.clientname);
+                vue.fd.append("tel", this.form.tel);
+                vue.fd.append("fax", this.form.fax);
+                vue.fd.append("address", this.form.address);
+                vue.fd.append("code", this.form.code);
+                vue.fd.append("bank", this.form.bank);
+                vue.fd.append("account", this.form.account);
+                vue.fd.append("addition", this.form.addition);
+                $.ajax({
+                    url: "/myClient",
+                    type: "POST",
+                    processData: false,
+                    contentType: false,
+                    data: vue.fd
+                    ,
+                    success: function (data1) {
+                        if (data1.msg == "success") {
+                            vue.$message.success('修改成功');
+                        }
+                    }
+                })
             },
         }
     })

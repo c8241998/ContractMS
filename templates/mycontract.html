@@ -64,7 +64,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear();">重 置</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
+            <el-button type="primary" @click="submitForm_draft">提 交</el-button>
         </div>
     </el-dialog>
     <el-dialog title="合同分配信息" :visible.sync="showContractInfo">
@@ -148,7 +148,60 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear();">重 置</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
+            <el-button type="primary" @click="submitForm_finalize">提 交</el-button>
+        </div>
+    </el-dialog>
+     <el-dialog title="查看合同内容" :visible.sync="showContract">
+        <el-form>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="合同号" :label-width="formLabelWidth">
+                        <span>[[ focusContract.contractnum ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="18">
+                    <el-form-item label="合同名称" :label-width="formLabelWidth">
+                        <span>[[ focusContract.contractname ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="6">
+                    <el-form-item label="起草人" :label-width="formLabelWidth">
+                        <span>[[ focusContract.draft ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="客户名" :label-width="formLabelWidth">
+                        <span>[[ focusContract.clientname ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="开始时间" :label-width="formLabelWidth">
+                        <span>[[ focusContract.begintime ]]</span>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="结束时间" :label-width="formLabelWidth">
+                        <span>[[ focusContract.endtime ]]</span>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-form-item label="合同内容" :label-width="formLabelWidth">
+                <el-input type="textarea" autosize placeholder=" focusContract.content"
+                          v-model="focusContract.content" :disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="附件"  :label-width="formLabelWidth">
+                        <span v-if="focusContract.file=='true'">
+                            <el-button type="text" @click="download(focusContract.contractnum)">下载</el-button>
+                        </span>
+                <span v-else>
+                            无
+                        </span>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="showContract = false">我看完啦</el-button>
         </div>
     </el-dialog>
     <el-header style="text-align: right; font-size: 12px">
@@ -170,9 +223,8 @@
                     <el-form-item label="状态">
                         <span>[[ c.row.state ]]</span>
                     </el-form-item>
-                    <el-form-item label="合同内容"
-                                  v-show="c.row.stateNum!='2'">
-                        <span>[[ c.row.content ]]</span>
+                    <el-form-item label="合同内容" v-show="c.row.stateNum!='2'">
+                        <el-button icon="el-icon-search" circle size="small" @click="showContractOpen(c.row)"></el-button>
                     </el-form-item>
                     <el-form-item label="附件"
                                   v-show="c.row.stateNum!='2'">
@@ -185,17 +237,16 @@
                     </el-form-item>
                     <el-form-item label="会签信息"
                                   v-show="c.row.stateNum==1||c.row.stateNum==2||c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
-                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'1')"></el-button>
+                        <el-button icon="el-icon-search" circle size="small" @click="showContractInfoOpen(c.row,'1')"></el-button>
                     </el-form-item>
                     <el-form-item label="前去定稿" v-show="c.row.stateNum==2">
-                        <el-button type="primary" icon="el-icon-edit" circle
-                                   @click="finalizeContract(c.row)"></el-button>
+                        <el-button type="primary" icon="el-icon-edit" circle size="small" @click="finalizeContract(c.row)"></el-button>
                     </el-form-item>
                     <el-form-item label="审批信息" v-show="c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
-                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'2')"></el-button>
+                        <el-button icon="el-icon-search" circle size="small" @click="showContractInfoOpen(c.row,'2')"></el-button>
                     </el-form-item>
                     <el-form-item label="签订信息" v-show="c.row.stateNum==4||c.row.stateNum==5">
-                        <el-button icon="el-icon-search" circle @click="showContractInfoOpen(c.row,'3')"></el-button>
+                        <el-button icon="el-icon-search" circle size="small" @click="showContractInfoOpen(c.row,'3')"></el-button>
                     </el-form-item>
 
                 </el-form>
@@ -311,6 +362,8 @@
                 },
                 tableData: [],
                 formLabelWidth: '100px',
+                showContract:false,
+                focusContract:'',
             };
         },
         methods: {
@@ -323,7 +376,35 @@
                 this.form.file = '';
                 this.showNewcontract = true;
             },
-            submitForm() {
+            submitForm_draft() {
+                this.$refs['form'].validate((valid) => {
+                    if (valid) {
+                        this.$refs.upload.submit();
+                        vue.fd = new FormData();
+                        vue.fd.append("type","draft");
+                        vue.fd.append("contractname", this.form.contractname);
+                        vue.fd.append("clientname", this.form.clientname);
+                        vue.fd.append("begintime", this.form.begintime);
+                        vue.fd.append("endtime", this.form.endtime);
+                        vue.fd.append("content", this.form.content);
+                        vue.fd.append("file", this.form.file);
+                        $.ajax({
+                            url: "/myContract",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd,
+                            success: function (data1) {
+                                vue.$message.success('起草成功！');
+                                window.location.href="";
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            submitForm_finalize() {
                 this.$refs['form'].validate((valid) => {
                     if (valid) {
                         this.$refs.upload.submit();
@@ -444,6 +525,10 @@
                 this.form.endtime = row.endtime; //结束时间
                 this.form.content = row.content;
                 this.form.file = row.file;
+            },
+            showContractOpen(row) {
+                this.focusContract = row;
+                this.showContract = true;
             }
         }
     })
