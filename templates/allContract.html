@@ -188,7 +188,7 @@
                 type: "POST",
                 data: {"type": "init"},
                 success: function (data1) {
-                    var contracts = JSON.parse(data1).contracts;
+                    var contracts = data1.contracts;
                     for (var i = 0; i < contracts.length; i++) {
                         let contract = contracts[i];
                         vue.tableData.push(

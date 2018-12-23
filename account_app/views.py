@@ -447,7 +447,28 @@ def setContract(request):
 
 
 def allContract(request):
-    return render(request, 'allContract.html')
+    if request.method == "POST":
+        if request.POST.get("type") == "init":
+            dic = {'0': '待分配', '1': '会签中', '2': '定稿中', '3': '审批中', '4': '签订中', '5': '签订完成'}
+            results = models.Contract.objects.all()
+            contracts = []
+            for result in results:
+                contract = {}
+                contract["contractnum"] = result.contractnum
+                contract["contractname"] = result.contractname
+                clientname = result.clientnum.clientname if result.clientnum else '客户资料已被删除'
+                contract['clientname'] = clientname
+                contract['begintime'] = result.begintime.__str__()
+                contract['endtime'] = result.endtime.__str__()
+                contract['state'] = dic.get(result.state.__str__())
+                contract['stateNum'] = result.state
+                contract['draft'] = result.draft.username
+                contract['content'] = result.content
+                contract['file'] = 'true' if result.file else 'false'
+                contracts.append(contract)
+            return JsonResponse({'contracts': contracts})
+    else:
+        return render(request, 'allContract.html')
 
 
 def role(request):
@@ -576,6 +597,26 @@ def myClient(request):
 
 
 def allClient(request):
+    if request.method == "POST":
+        type = request.POST.get('type')
+        if type == 'init':
+            results = models.Client.objects.all()
+            clients=[]
+            for result in results:
+                client={
+                    'clientnum': result.clientnum,
+                    'clientname': result.clientname,
+                    'tel': result.tel,
+                    'fax': result.fax,
+                    'address': result.address,
+                    'code': result.code,
+                    'bank': result.bank,
+                    'account': result.account,
+                    'addition': result.addition,
+                    'username':result.username.username
+                }
+                clients.append(client)
+            return JsonResponse({"clients":clients})
     return render(request, 'allClient.html')
 
 
