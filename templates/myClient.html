@@ -20,7 +20,248 @@
 </head>
 <body>
 <el-container id="table">
-    我的客户
+    <el-dialog title="添加客户" :visible.sync="showNewClient">
+        <el-form :model="form" ref="form" :rules="rules">
+            <el-form-item label="客户名" :label-width="formLabelWidth" prop="clientname">
+                <el-input v-model="form.clientname" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth" prop="tel">
+                <el-input v-model="form.tel" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="传真" :label-width="formLabelWidth" prop="fax">
+                <el-input v-model="form.fax" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="邮编" :label-width="formLabelWidth" prop="code">
+                <el-input v-model="form.code" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="地址" :label-width="formLabelWidth" prop="address">
+                <el-input v-model="form.address" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="银行名称" :label-width="formLabelWidth" prop="bank">
+                <el-input v-model="form.bank" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="银行账户" :label-width="formLabelWidth" prop="account">
+                <el-input v-model="form.account" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth" prop="addition">
+                <el-input v-model="form.addition" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="clear();">重 置</el-button>
+            <el-button type="primary" @click="submitForm">提 交</el-button>
+        </div>
+    </el-dialog>
+    <el-header style="text-align: right; font-size: 12px">
+        <el-button icon="el-icon-circle-plus-outline" @click="showNewClient=true">添加客户</el-button>
+    </el-header>
+    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+        <el-table-column type="expand">
+            <div slot-scope="c">
+                <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="客户名称">
+                        <span>[[ c.row.clientname ]]</span>
+                    </el-form-item>
+                    <el-form-item label="地址">
+                        <span>[[ c.row.address ]]</span>
+                    </el-form-item>
+                    <el-form-item label="银行名称">
+                        <span>[[ c.row.bank ]]</span>
+                    </el-form-item>
+                    <el-form-item label="邮编">
+                        <span>[[ c.row.code ]]</span>
+                    </el-form-item>
+                    <el-form-item label="银行账户">
+                        <span>[[ c.row.account ]]</span>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <span>[[ c.row.addition ]]</span>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-table-column>
+        <el-table-column prop="clientnum" label="客户编号" sortable></el-table-column>
+        <el-table-column prop="clientname" label="客户名称"></el-table-column>
+        <el-table-column prop="tel" label="电话"></el-table-column>
+        <el-table-column prop="fax" label="传真"></el-table-column>
+        <el-table-column>
+            <div slot-scope="scope">
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           @click="deleteRow(scope.row)">删除我的客户
+                </el-button>
+            </div>
+        </el-table-column>
+    </el-table>
 </el-container>
 </body>
+<script>
+    var vue = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#table',
+        created: function () {
+            // 页面刚被渲染时向后端发送ajax请求数据  解析json后放入vue的变量tableData里
+            $.ajax({
+                url: "/myClient",
+                type: "POST",
+                data: {"type": "init"},
+                success: function (data1) {
+                    let clients = data1.clients;
+                    for (var i = 0; i < clients.length; i++) {
+                        let client = clients[i];
+                        vue.tableData.push(
+                            {
+                                clientnum: client.clientnum,
+                                clientname: client.clientname,
+                                tel: client.tel,
+                                fax: client.fax,
+                                address: client.address,
+                                code: client.code,
+                                bank: client.bank,
+                                account: client.account,
+                                addition: client.addition,
+                            }
+                        );
+                    }
+
+                }
+            });
+        },
+        data() {
+            var validateTel = (rule, value, callback) => {
+                if (!(/^1(3|4|5|7|8)\d{9}$/.test(value))) {
+                    callback(new Error('手机号码有误，请重新输入！'));
+                }
+                else {
+                    callback();
+                }
+            };
+            var validateFax = (rule, value, callback) => {
+                if (!(/^(\d{3,4}-)?\d{7,8}$/.test(value)) && value != '') {
+                    callback(new Error('传真号码有误，请重新输入！'));
+                }
+                else {
+                    callback();
+                }
+            };
+            var validateCode = (rule, value, callback) => {
+                if (!(/^[0-9]{6}$/.test(value)) && value != '') {
+                    callback(new Error('邮编有误，请重新输入！'));
+                }
+                else {
+                    callback();
+                }
+            };
+            var validateAccount = (rule, value, callback) => {
+                if (!(/^([1-9]{1})(\d{14}|\d{18})$/.test(value)) && value != '') {
+                    callback(new Error('银行账户有误，请重新输入！'));
+                }
+                else {
+                    callback();
+                }
+            };
+            return {
+                fd: '',
+                formLabelWidth: '100px',
+                tableData: [],
+                showNewClient: false,
+                form: {
+                    clientname: '',
+                    tel: '',
+                    fax: '',
+                    address: '',
+                    code: '',
+                    bank: '',
+                    account: '',
+                    addition: '',
+                },
+                rules: {
+                    clientname: [{required: true, message: '请输入客户姓名', trigger: 'blur'}], //客户名
+                    tel: [
+                        {required: true, message: '手机号码不可为空！', trigger: 'blur'},
+                        {validator: validateTel, trigger: 'blur'}
+                    ],
+                    fax: [
+                        {validator: validateFax, trigger: 'blur'}
+                    ],
+                    code: [
+                        {validator: validateCode, trigger: 'blur'}
+                    ],
+                    address: [],
+                    bank: [],
+                    account: [
+                        {validator: validateAccount, trigger: 'blur'}
+                    ],
+                },
+            }
+        },
+        methods: {
+            submitForm() {
+                this.$refs['form'].validate((valid) => {
+                    if (valid) {
+                        vue.fd = new FormData();
+                        vue.fd.append("type", "add");
+                        vue.fd.append("clientname", this.form.clientname);
+                        vue.fd.append("tel", this.form.tel);
+                        vue.fd.append("fax", this.form.fax);
+                        vue.fd.append("address", this.form.address);
+                        vue.fd.append("code", this.form.code);
+                        vue.fd.append("bank", this.form.bank);
+                        vue.fd.append("account", this.form.account);
+                        vue.fd.append("addition", this.form.addition);
+                        $.ajax({
+                            url: "/myClient",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd
+                            ,
+                            success: function (data1) {
+                                vue.$message.success('客户添加成功！');
+                                window.location.href = "";
+                            }
+                        })
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            clear() {
+                if (confirm("确定清空所有内容吗？")) {
+                    this.form.clientname = '';
+                    this.form.tel = '';
+                    this.form.fax = '';
+                    this.form.address = '';
+                    this.form.code = '';
+                    this.form.bank = '';
+                    this.form.account = '';
+                    this.form.addition = '';
+                }
+                else {
+                    return false;
+                }
+            },
+            deleteRow(tempRow) {
+                if (confirm("确定删除吗？")) {
+                    vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("clientnum", tempRow.clientnum);
+                    $.ajax({
+                        url: "/myClient",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd,
+                        success: function () {
+                            vue.$message.success('删除成功！');
+                            window.location.href="";
+                        }
+                    })
+                }
+                else {
+                    return false;
+                }
+            },
+        }
+    })
+</script>
 </html>

@@ -106,7 +106,6 @@ def myContract(request):
             user_models = models.MyUser.objects.get(email=user.email)
             results = models.Contract.objects.filter(draft=user_models)
             contracts = []
-
             for result in results:
                 contract = {}
                 contract["contractnum"] = result.contractnum
@@ -135,7 +134,7 @@ def myContract(request):
             contract.begintime = request.POST.get("begintime")
             contract.endtime = request.POST.get("endtime")
             contract.content = request.POST.get("content")
-            if(request.FILES.get("file", "")):
+            if (request.FILES.get("file", "")):
                 contract.file = request.FILES.get("file", "")
             contract.state = 3
             contract.save()
@@ -325,6 +324,44 @@ def user(request):
 
 
 def myClient(request):
+    if request.method == "POST":
+        type = request.POST.get('type')
+        if type == "init":
+            user_model = models.MyUser.objects.get(username=get_user(request).username)
+            results = models.Client.objects.filter(username=user_model)
+            clients = []
+            for result in results:
+                client = {
+                    'clientnum': result.clientnum,
+                    'clientname': result.clientname,
+                    'tel': result.tel,
+                    'fax': result.fax,
+                    'address': result.address,
+                    'code': result.code,
+                    'bank': result.bank,
+                    'account': result.account,
+                    'addition': result.addition,
+                }
+                clients.append(client)
+            return JsonResponse({'clients':clients})
+        if type == "add":
+            client = models.Client()
+            client.clientname = request.POST.get("clientname")
+            client.tel = request.POST.get("tel")
+            client.fax = request.POST.get("fax")
+            client.address = request.POST.get("address")
+            client.code = request.POST.get("code")
+            client.bank = request.POST.get("bank")
+            client.account = request.POST.get("account")
+            client.addition = request.POST.get("addition")
+            client.username = models.MyUser.objects.get(username=get_user(request).username)
+            client.save()
+            return HttpResponse("")
+        if type == "delete":
+            client = models.Client.objects.get(clientnum=request.POST.get("clientnum"))
+            client.delete()
+            return HttpResponse('')
+
     return render(request, 'myClient.html')
 
 
