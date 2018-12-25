@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html  style="overflow-x: hidden; overflow-y: auto;">
+<html style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -49,16 +49,16 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear();">重 置</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
+            <el-button type="primary" @click="addClient">提 交</el-button>
         </div>
     </el-dialog>
     <el-dialog title="修改客户信息" :visible.sync="showEditClient">
         <el-form :model="form" ref="form" :rules="rules">
-             <el-form-item label="客户编号" :label-width="formLabelWidth" prop="clientnum">
+            <el-form-item label="客户编号" :label-width="formLabelWidth" prop="clientnum">
                 <el-input v-model="form.clientnum" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="客户名" :label-width="formLabelWidth" prop="clientname">
-                <el-input v-model="form.clientname"></el-input>
+                <el-input v-model="form.clientname" :disabled="true"></el-input>
             </el-form-item>
             <el-form-item label="电话" :label-width="formLabelWidth" prop="tel">
                 <el-input v-model="form.tel"></el-input>
@@ -67,30 +67,44 @@
                 <el-input v-model="form.fax"></el-input>
             </el-form-item>
             <el-form-item label="邮编" :label-width="formLabelWidth" prop="code">
-                <el-input v-model="form.code" ></el-input>
+                <el-input v-model="form.code"></el-input>
             </el-form-item>
             <el-form-item label="地址" :label-width="formLabelWidth" prop="address">
-                <el-input v-model="form.address" ></el-input>
+                <el-input v-model="form.address"></el-input>
             </el-form-item>
             <el-form-item label="银行名称" :label-width="formLabelWidth" prop="bank">
-                <el-input v-model="form.bank" ></el-input>
+                <el-input v-model="form.bank"></el-input>
             </el-form-item>
             <el-form-item label="银行账户" :label-width="formLabelWidth" prop="account">
-                <el-input v-model="form.account" ></el-input>
+                <el-input v-model="form.account"></el-input>
             </el-form-item>
             <el-form-item label="备注" :label-width="formLabelWidth" prop="addition">
-                <el-input v-model="form.addition" ></el-input>
+                <el-input v-model="form.addition"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clear();">重 置</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
+            <el-button type="primary" @click="saveRow">提 交</el-button>
         </div>
     </el-dialog>
     <el-header style="text-align: right; font-size: 12px">
-        <el-button icon="el-icon-circle-plus-outline" @click="showNewClient=true">添加客户</el-button>
+        <el-row :gutter="20">
+            <el-col :span="8">
+                <el-input
+                        placeholder="输入客户名搜索"
+                        v-model="search"
+                        size="mini"
+                        clearable>
+                </el-input>
+            </el-col>
+            <el-col :span="16">
+                <el-button icon="el-icon-circle-plus-outline" @click="showNewClient=true">添加客户</el-button>
+            </el-col>
+        </el-row>
     </el-header>
-    <el-table ref="filterTable" :data="tableData" style="width: 100%">
+    <el-table ref="filterTable"
+              :data="tableData.filter(data => !search || data.clientname.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
         <el-table-column type="expand">
             <div slot-scope="c">
                 <el-form label-position="left" inline class="demo-table-expand">
@@ -115,14 +129,14 @@
                 </el-form>
             </div>
         </el-table-column>
-        <el-table-column prop="clientnum" label="客户编号" sortable></el-table-column>
-        <el-table-column prop="clientname" label="客户名称"></el-table-column>
-        <el-table-column prop="tel" label="电话"></el-table-column>
-        <el-table-column prop="fax" label="传真"></el-table-column>
-        <el-table-column>
+        <el-table-column prop="clientnum" label="客户编号" sortable align="center"></el-table-column>
+        <el-table-column prop="clientname" label="客户名称" align="center"></el-table-column>
+        <el-table-column prop="tel" label="电话" align="center"></el-table-column>
+        <el-table-column prop="fax" label="传真" align="center"></el-table-column>
+        <el-table-column align="center">
             <div slot-scope="scope">
                 <el-button size="mini" type="primary" style="margin-left: 0px;"
-                           @click="deleteRow(scope.row)">删除我的客户
+                           @click="deleteRow(scope.row,scope.$index)">删除我的客户
                 </el-button>
                 <el-button size="mini" type="primary" style="margin-left: 0px;"
                            @click="editRow(scope.row)">修改客户信息
@@ -197,13 +211,14 @@
                 }
             };
             return {
+                search: '',
                 fd: '',
                 formLabelWidth: '100px',
                 tableData: [],
                 showNewClient: false,
-                showEditClient:false,
+                showEditClient: false,
                 form: {
-                    clientnum:'',
+                    clientnum: '',
                     clientname: '',
                     tel: '',
                     fax: '',
@@ -234,7 +249,7 @@
             }
         },
         methods: {
-            submitForm() {
+            addClient() {
                 this.$refs['form'].validate((valid) => {
                     if (valid) {
                         vue.fd = new FormData();
@@ -255,8 +270,14 @@
                             data: vue.fd
                             ,
                             success: function (data1) {
-                                vue.$message.success('客户添加成功！');
-                                window.location.href = "";
+                                if(data1.msg == "success"){
+                                   vue.$message.success('客户添加成功！');
+                                    window.location.href = "";
+                                }
+                                else{
+                                    vue.$message.error('客户已存在！');
+                                }
+
                             }
                         })
                     } else {
@@ -285,7 +306,7 @@
                     });
                 });
             },
-            deleteRow(tempRow) {
+            deleteRow(tempRow, order) {
                 vue.$confirm('此操作将永久删除该客户, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -302,45 +323,51 @@
                         data: vue.fd,
                         success: function () {
                             vue.$message.success('删除成功！');
-                            window.location.href = "";
+                            vue.tableData.splice(order, 1);
                         }
                     })
-               }).catch(() => {
+                }).catch(() => {
                     this.$message({
                         type: 'info',
                         message: '已取消删除'
                     });
                 });
             },
-            editRow(row){
-                this.form=row;
-                this.showEditClient=true;
+            editRow(row) {
+                this.form = row;
+                this.showEditClient = true;
             },
             saveRow() {
-                vue.fd = new FormData();
-                vue.fd.append("type", "save");
-                vue.fd.append("clientnum", this.form.clientnum);
-                vue.fd.append("clientname", this.form.clientname);
-                vue.fd.append("tel", this.form.tel);
-                vue.fd.append("fax", this.form.fax);
-                vue.fd.append("address", this.form.address);
-                vue.fd.append("code", this.form.code);
-                vue.fd.append("bank", this.form.bank);
-                vue.fd.append("account", this.form.account);
-                vue.fd.append("addition", this.form.addition);
-                $.ajax({
-                    url: "/myClient",
-                    type: "POST",
-                    processData: false,
-                    contentType: false,
-                    data: vue.fd
-                    ,
-                    success: function (data1) {
-                        if (data1.msg == "success") {
-                            vue.$message.success('修改成功');
-                        }
+                this.$refs['form'].validate((valid) => {
+                    if (valid) {
+                        vue.fd = new FormData();
+                        vue.fd.append("type", "save");
+                        vue.fd.append("clientnum", this.form.clientnum);
+                        vue.fd.append("tel", this.form.tel);
+                        vue.fd.append("fax", this.form.fax);
+                        vue.fd.append("address", this.form.address);
+                        vue.fd.append("code", this.form.code);
+                        vue.fd.append("bank", this.form.bank);
+                        vue.fd.append("account", this.form.account);
+                        vue.fd.append("addition", this.form.addition);
+                        $.ajax({
+                            url: "/myClient",
+                            type: "POST",
+                            processData: false,
+                            contentType: false,
+                            data: vue.fd
+                            ,
+                            success: function (data1) {
+                                if (data1.msg == "success") {
+                                    vue.$message.success('修改成功');
+                                    window.location.href="";
+                                }
+                            }
+                        })
+                    } else {
+                        return false;
                     }
-                })
+                });
             },
         }
     })

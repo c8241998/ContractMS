@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html  style="overflow-x: hidden; overflow-y: auto;">
+<html style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -27,10 +27,12 @@
             </el-col>
         </el-row>
     </el-header>
-    <el-table ref="tableChange" :data="tableData.filter(data => !search || data.username.toLowerCase().includes(search.toLowerCase()))" style="width: 100%">
+    <el-table ref="tableChange"
+              :data="tableData.filter(data => !search || data.username.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
         <el-table-column prop="username" label="用户名" sortable align="center"></el-table-column>
-        <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
-        <el-table-column prop="role" label="角色" align="center">
+        <el-table-column prop="email" label="邮箱" align="center" align="center"></el-table-column>
+        <el-table-column prop="role" label="角色" align="center" align="center">
             <div slot-scope="scope">
                 <el-select filterable v-model="scope.row.role">
                     {% for role in roles %}
@@ -42,9 +44,8 @@
         <el-table-column align="center">
             <div slot-scope="scope">
                 <el-button size="mini" @click="saveRow(scope.row)">保存</el-button>
-                <el-button size="mini" type="danger" @click="deleteRow(scope.row)">删除</el-button>
+                <el-button size="mini" type="danger" @click="deleteRow(scope.row,scope.$index)">删除</el-button>
             </div>
-        </el-table-column>
         </el-table-column>
 
     </el-table>
@@ -106,16 +107,13 @@
                         vue.$message.success("更改角色成功!");
                     }
                 })
-
-
             },
-            deleteRow(tempRow) {
+            deleteRow(tempRow,order) {
                 vue.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-
                     vue.fd = new FormData();
                     vue.fd.append("type", "delete");
                     vue.fd.append("username", tempRow.username);
@@ -131,7 +129,7 @@
                                 message: '删除成功!',
                                 type: 'success'
                             });
-                            window.location.href = "";
+                            vue.tableData.splice(order, 1);
                         }
                     })
                 }).catch(() => {

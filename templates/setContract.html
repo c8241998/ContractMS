@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html  style="overflow-x: hidden; overflow-y: auto;">
+<html style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -38,8 +38,7 @@
             <el-table-column prop="stime" label="签订时间" width="150"></el-table-column>
         </el-table>
     </el-dialog>
-
-    <el-dialog title="分配合同管理人员" :visible.sync="showSetContract" width="40%">
+    <el-dialog title="分配合同管理人员" :visible.sync="showSetContract" width="40%" v-loading="loading">
         <el-form ref="set">
             {#            :model="setContract"#}
             <el-collapse accordion>
@@ -76,33 +75,53 @@
             <el-button type="primary" @click="setContract_">提 交</el-button>
         </div>
     </el-dialog>
-
     <el-header style="text-align: right; font-size: 12px">
-        <el-button @click="resetDateFilter">清除合同状态过滤器</el-button>
+        <el-row :gutter="20">
+            <el-col :span="8">
+                <el-input
+                        placeholder="输入合同名搜索"
+                        v-model="search"
+                        size="mini"
+                        clearable>
+                </el-input>
+            </el-col>
+            <el-col :span="16">
+                 <el-button @click="resetDateFilter">清除合同状态过滤器</el-button>
+            </el-col>
+        </el-row>
     </el-header>
-
-    <el-table ref="filterTable" :data="tableData" style="width: 100%">
-        <el-table-column prop="contractnum" label="合同号" sortable></el-table-column>
-        <el-table-column prop="contractname" label="合同名"></el-table-column>
-        <el-table-column prop="clientname" label="客户名"></el-table-column>
-        <el-table-column prop="begintime" label="开始时间" sortable></el-table-column>
-        <el-table-column prop="endtime" label="结束时间" sortable></el-table-column>
-        <el-table-column prop="stateNum" label="状态" sortable column-key="stateNum"
-                         :filters="[{ text: '未分配', value: ['0'] }, { text: '已分配', value: ['1','2','3','4','5'] }]"
+    <el-table ref="filterTable"
+              :data="tableData.filter(data => !search || data.contractname.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
+        <el-table-column prop="contractnum" label="合同号" sortable align="center"></el-table-column>
+        <el-table-column prop="contractname" label="合同名" align="center"></el-table-column>
+        <el-table-column prop="clientname" label="客户名" align="center"></el-table-column>
+        <el-table-column prop="begintime" label="开始时间" sortable align="center"></el-table-column>
+        <el-table-column prop="endtime" label="结束时间" sortable align="center"></el-table-column>
+        <el-table-column prop="state" label="合同状态" sortable align="center" column-key="stateNum"
+                         :filters="[{ text: '未分配', value: ['0'] }, { text: '已分配', value: ['1','2','3','4','5','-1'] }]"
                          :filter-method="filterTag"
                          filter-placement="bottom-end">
             <div slot-scope="scope">
                 <el-tag
+                        v-show="scope.row.stateNum=='-1' "
+                        type="danger"
+                        disable-transitions
+                        style="margin-left: 0px;">[[scope.row.state]]
+                </el-tag>
+                <el-tag
+                        v-show="scope.row.stateNum!='-1' "
                         :type="scope.row.stateNum === '0' ? 'primary' : 'success'"
-                        disable-transitions>[[ scope.row.state ]]
+                        disable-transitions
+                        style="margin-left: 0px;">[[scope.row.state]]
                 </el-tag>
             </div>
         </el-table-column>
-        <el-table-column prop="draft" label="起草人"></el-table-column>
-        <el-table-column label="分配信息">
+        <el-table-column prop="draft" label="起草人" align="center"></el-table-column>
+        <el-table-column label="分配信息" align="center">
             <div slot-scope="scope">
                 <el-button size="mini" type="success"
-                           v-show="scope.row.stateNum=='1'||scope.row.stateNum=='2'||scope.row.stateNum=='3'||scope.row.stateNum=='4'||scope.row.stateNum=='5'"
+                           v-show="scope.row.stateNum=='-1'||scope.row.stateNum=='1'||scope.row.stateNum=='2'||scope.row.stateNum=='3'||scope.row.stateNum=='4'||scope.row.stateNum=='5'"
                            @click="showContractInfoOpen(scope.row)">查看分配信息
                 </el-button>
                 <el-button size="mini" v-show="scope.row.stateNum=='0'" type="primary" style="margin-left: 0px;"
@@ -152,7 +171,7 @@
         data() {
             return {
                 tableData: [],
-
+                search:'',
                 showSetContract: false,
                 usernames: [],
                 usernames1: [],
@@ -161,7 +180,7 @@
                 value_approval: [],
                 usernames3: [],
                 value_sign: [],
-
+                loading: false,
                 setContract: [{
                     contractnum: '',
                     countersign1: '',
@@ -250,26 +269,26 @@
                 vue.fd.append("type", "distribution");
                 vue.fd.append("contractnum", this.setContract.contractnum);
                 vue.fd.append("countersign1", this.setContract.countersign1);
-                if(this.setContract.countersign2)
+                if (this.setContract.countersign2)
                     vue.fd.append("countersign2", this.setContract.countersign2);
                 else
                     vue.fd.append("countersign2", "");
-                if(this.setContract.countersign3)
+                if (this.setContract.countersign3)
                     vue.fd.append("countersign3", this.setContract.countersign3);
                 else
                     vue.fd.append("countersign3", "");
                 vue.fd.append("approval1", this.setContract.approval1);
-                if(this.setContract.approval2)
+                if (this.setContract.approval2)
                     vue.fd.append("approval2", this.setContract.approval2);
                 else
                     vue.fd.append("approval2", "");
-                if(this.setContract.approval3)
+                if (this.setContract.approval3)
                     vue.fd.append("approval3", this.setContract.approval3);
                 else
                     vue.fd.append("approval3", "");
                 vue.fd.append("sign", this.setContract.sign);
 
-                vue.setContract=[{
+                vue.setContract = [{
                     contractnum: '',
                     countersign1: '',
                     countersign2: '',
@@ -279,7 +298,7 @@
                     approval3: '',
                     sign: '',
                 }];
-
+                vue.loading = true;
                 $.ajax({
                     url: "/setContract",
                     type: "POST",
@@ -288,8 +307,9 @@
                     data: vue.fd
                     ,
                     success: function (data1) {
+                        vue.loading = false;
                         vue.$message.success('分配成功！');
-                        window.location.href="";
+                        window.location.href = "";
                     }
                 })
             },
@@ -298,26 +318,26 @@
                 $.ajax({
                     url: "/setContract",
                     type: "POST",
-                    data:{"type":"info","contractnum":row.contractnum},
+                    data: {"type": "info", "contractnum": row.contractnum},
                     success: function (data1) {
                         var cInfo = data1.cInfo;
-                        vue.contractInfo=
+                        vue.contractInfo =
                             {
                                 contractnum: cInfo.contractnum,
                                 countersign: [
                                     {
-                                    countersignPerson: cInfo.countersign1,
-                                    opinion: cInfo.copinion1,
-                                    ctime: cInfo.ctime1,
-                                }, {
-                                    countersignPerson: cInfo.countersign2,
-                                    opinion: cInfo.copinion2,
-                                    ctime: cInfo.ctime2,
-                                }, {
-                                    countersignPerson: cInfo.countersign3,
-                                    opinion: cInfo.copinion3,
-                                    ctime: cInfo.ctime3,
-                                }
+                                        countersignPerson: cInfo.countersign1,
+                                        opinion: cInfo.copinion1,
+                                        ctime: cInfo.ctime1,
+                                    }, {
+                                        countersignPerson: cInfo.countersign2,
+                                        opinion: cInfo.copinion2,
+                                        ctime: cInfo.ctime2,
+                                    }, {
+                                        countersignPerson: cInfo.countersign3,
+                                        opinion: cInfo.copinion3,
+                                        ctime: cInfo.ctime3,
+                                    }
                                 ],
                                 approval: [{
                                     approvalPerson: cInfo.approval1,

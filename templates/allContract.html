@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html  style="overflow-x: hidden; overflow-y: auto;">
+<html style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -52,34 +52,36 @@
     <el-dialog title="查看合同内容" :visible.sync="showContract">
         <el-form>
             <el-row :gutter="20">
-                <el-col :span="6">
+                <el-col :span="12">
                     <el-form-item label="合同号" :label-width="formLabelWidth">
                         <span>[[ focusContract.contractnum ]]</span>
                     </el-form-item>
                 </el-col>
-                <el-col :span="18">
+                <el-col :span="12">
                     <el-form-item label="合同名称" :label-width="formLabelWidth">
                         <span>[[ focusContract.contractname ]]</span>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row :gutter="20">
-                <el-col :span="6">
+                <el-col :span="12">
                     <el-form-item label="起草人" :label-width="formLabelWidth">
                         <span>[[ focusContract.draft ]]</span>
                     </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="12">
                     <el-form-item label="客户名" :label-width="formLabelWidth">
                         <span>[[ focusContract.clientname ]]</span>
                     </el-form-item>
                 </el-col>
-                <el-col :span="6">
+            </el-row>
+            <el-row :gutter="20">
+                <el-col :span="12">
                     <el-form-item label="开始时间" :label-width="formLabelWidth">
                         <span>[[ focusContract.begintime ]]</span>
                     </el-form-item>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="12">
                     <el-form-item label="结束时间" :label-width="formLabelWidth">
                         <span>[[ focusContract.endtime ]]</span>
                     </el-form-item>
@@ -112,9 +114,9 @@
             </el-col>
         </el-row>
     </el-header>
-    <el-table
-            :data="tableData.filter(data => !search || data.contractname.toLowerCase().includes(search.toLowerCase()))"
-            style="width: 100%">
+    <el-table ref="filterTable"
+              :data="tableData.filter(data => !search || data.contractname.toLowerCase().includes(search.toLowerCase()))"
+              style="width: 100%">
         <el-table-column type="expand">
             <div slot-scope="c">
                 <el-form label-position="left" inline class="demo-table-expand">
@@ -141,15 +143,16 @@
                         </span>
                     </el-form-item>
                     <el-form-item label="会签信息"
-                                  v-show="c.row.stateNum==1||c.row.stateNum==2||c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
+                                  v-show="c.row.stateNum=='1'||c.row.stateNum=='2'||c.row.stateNum=='3'||c.row.stateNum=='4'||c.row.stateNum=='5'||c.row.stateNum=='-1'">
                         <el-button icon="el-icon-search" circle size="small"
                                    @click="showContractInfoOpen(c.row,'1')"></el-button>
                     </el-form-item>
-                    <el-form-item label="审批信息" v-show="c.row.stateNum==3||c.row.stateNum==4||c.row.stateNum==5">
+                    <el-form-item label="审批信息"
+                                  v-show="c.row.stateNum=='3'||c.row.stateNum=='4'||c.row.stateNum=='5'||c.row.stateNum=='-1'">
                         <el-button icon="el-icon-search" circle size="small"
                                    @click="showContractInfoOpen(c.row,'2')"></el-button>
                     </el-form-item>
-                    <el-form-item label="签订信息" v-show="c.row.stateNum==4||c.row.stateNum==5">
+                    <el-form-item label="签订信息" v-show="c.row.stateNum=='4'||c.row.stateNum=='5'">
                         <el-button icon="el-icon-search" circle size="small"
                                    @click="showContractInfoOpen(c.row,'3')"></el-button>
                     </el-form-item>
@@ -157,22 +160,34 @@
                 </el-form>
             </div>
         </el-table-column>
-        <el-table-column label="合同ID" prop="contractnum" sortable></el-table-column>
-        <el-table-column label="合同名称" prop="contractname"></el-table-column>
-        <el-table-column label="客户名" prop="clientname"></el-table-column>
-        <el-table-column label="起草人" prop="draft" sortable></el-table-column>
-        <el-table-column label="开始时间" prop="begintime" sortable></el-table-column>
-        <el-table-column label="结束时间" prop="endtime" sortable></el-table-column>
-        <el-table-column label="合同状态" prop="state" sortable column-key="stateNum"
-                         :filters="[{ text: '待分配', value: ['0'] },
-                         { text: '会签中', value: ['1'] },
-                         { text: '定稿中', value: ['2'] },
-                         { text: '审批中', value: ['3'] },
-                         { text: '签订中', value: ['4'] },
-                         { text: '签订完成', value: ['5'] },
-                          { text: '审批未通过', value: ['-1'] } ]"
+        <el-table-column label="合同ID" prop="contractnum" sortable align="center"></el-table-column>
+        <el-table-column label="合同名称" prop="contractname" align="center"></el-table-column>
+        <el-table-column label="客户名" prop="clientname" align="center"></el-table-column>
+        <el-table-column label="起草人" prop="draft" sortable align="center"></el-table-column>
+        <el-table-column label="开始时间" prop="begintime" sortable align="center"></el-table-column>
+        <el-table-column label="结束时间" prop="endtime" sortable align="center"></el-table-column>
+        <el-table-column prop="state" label="合同状态" sortable align="center" column-key="stateNum"
+                         :filters="[{ text: '审批未通过', value: ['-1'] },{ text: '会签中', value: ['1'] }, { text: '定稿中', value: ['2'] }, { text: '审批中', value: ['3'] }, { text: '签订中', value: ['4'] }, { text: '签订完成', value: ['5'] } ]"
                          :filter-method="filterTag_stateNum"
                          filter-placement="bottom-end">
+            <div slot-scope="scope">
+                <el-tag
+                        v-show="scope.row.stateNum=='-1' "
+                        type="danger"
+                        disable-transitions>[[scope.row.state]]
+                </el-tag>
+                <el-tag
+                        v-show="scope.row.stateNum!='-1' "
+                        disable-transitions>[[scope.row.state]]
+                </el-tag>
+            </div>
+        </el-table-column>
+        <el-table-column>
+            <div slot-scope="scope">
+                <el-button size="mini" type="primary" style="margin-left: 0px;"
+                           @click="deleteRow(scope.row,scope.$index)">删除
+                </el-button>
+            </div>
         </el-table-column>
     </el-table>
 </el-container>
@@ -220,6 +235,7 @@
                 showContract: false,
                 focusContract: '',
                 search: '',
+                fd: '',
             };
         },
         methods: {
@@ -251,6 +267,33 @@
                 form.append(sql);
                 $(document.body).append(form)
                 form.submit()
+            },
+            deleteRow(tempRow,order) {
+                vue.$confirm('此操作将永久删除该合同, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    vue.fd = new FormData();
+                    vue.fd.append("type", "delete");
+                    vue.fd.append("contractnum", tempRow.contractnum);
+                    $.ajax({
+                        url: "/allContract",
+                        type: "POST",
+                        processData: false,
+                        contentType: false,
+                        data: vue.fd,
+                        success: function () {
+                            vue.$message.success('删除成功！');
+                            vue.tableData.splice(order, 1);
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
             },
             showContractInfoOpen(row, activeName) {
                 this.activeName = activeName;
@@ -301,7 +344,6 @@
                                     stime: cInfo.stime,
                                 }],
                             }
-                        {#);#}
                     }
                 })
             },

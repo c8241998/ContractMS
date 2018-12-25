@@ -1,6 +1,6 @@
 {% load static %}
 <!doctype html>
-<html  style="overflow-x: hidden; overflow-y: auto;">
+<html style="overflow-x: hidden; overflow-y: auto;">
 
 <head>
     <meta charset="utf-8">
@@ -111,7 +111,7 @@
             <el-table-column align="center">
                 <div slot-scope="scope">
                     <el-button size="mini" @click="saveRow(scope.row)">保存</el-button>
-                    <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    <el-button size="mini" type="danger" @click="handleDelete(scope.row,scope.$index)">删除</el-button>
                 </div>
             </el-table-column>
         </el-table-column>
@@ -160,22 +160,22 @@
                 information: [
                     {
                         name: '合同管理',
-                        info: ''
+                        info: '全部合同的查询、删除'
                     }, {
                         name: '流程管理1',
-                        info: ''
+                        info: '会签、审批、签订'
                     }, {
                         name: '流程管理2',
-                        info: ''
+                        info: '分配会签、审批、签订人员'
                     }, {
                         name: '用户管理',
-                        info: ''
+                        info: '用户的删改查以及角色配置'
                     }, {
                         name: '角色管理',
-                        info: ''
+                        info: '角色的增删改查'
                     }, {
                         name: '客户管理',
-                        info: ''
+                        info: '全体客户的增删改查'
                     }],
                 newRole: {
                     role: '', //角色名
@@ -246,11 +246,21 @@
 
             },
             clear() {
-                this.newRole.role = ''; //合同名
-                this.newRole.description = ''; //客户名
+                vue.$confirm('此操作将清空已输入的角色信息, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.newRole.role = '';
+                    this.newRole.description = '';
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消清空'
+                    });
+                });
             },
-            handleDelete(tempRow) {
-
+            handleDelete(tempRow,order) {
                 vue.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -269,7 +279,7 @@
                         success: function (data1) {
                             if (data1.msg == "success") {
                                 vue.$message.success('删除成功！');
-                                window.location.href = "";
+                                vue.tableData.splice(order, 1);
                             }
                         }
                     })
