@@ -586,7 +586,7 @@
                         vue.fd = new FormData();
                         vue.fd.append("type", "sign");
                         vue.fd.append("contractnum", this.form_sign.contractnum);
-                        vue.fd.append("sinformation", this.form_sign.astsinformationate);
+                        vue.fd.append("sinformation", this.form_sign.sinformation);
                         $.ajax({
                             url: "/myManageContract",
                             type: "POST",

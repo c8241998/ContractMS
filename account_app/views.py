@@ -83,7 +83,7 @@ def manage(request):
     username = user.username
     if request.method == "POST":
         user_models = models.MyUser.objects.get(username=username)
-        results = models.message.objects.all()
+        results = models.message.objects.filter(username=user_models)
         news=[]
         dic = {-1:'审批未通过',0:'分配',1:'会签',2:'定稿',3:'审批',4:'签订'}
         for result in results:
@@ -526,6 +526,10 @@ def allContract(request):
             contract = models.Contract.objects.get(contractnum=contractnum)
             contract.delete()
             return HttpResponse('')
+        if request.POST.get("type") == "info":
+            contractnum = request.POST.get("contractnum")
+            cInfo = getContractInfo(contractnum)
+            return JsonResponse({"cInfo": cInfo})
     else:
         return render(request, 'allContract.html')
 
